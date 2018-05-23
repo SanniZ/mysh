@@ -70,11 +70,10 @@ help_menu=(
 	"		update vendorimage"
 	)
 
-function usage_help()
-{
-	for ((i=0; i < ${#help_menu[*]}; i++))
+function usage_help() {
+	for help in ${help_menu[@]}
 	do
-		echo ${help_menu[$i]}
+		echo ${help}
 	done
 }
 
@@ -132,11 +131,10 @@ function set_build_tgts() {
 function build_tgts()
 {
 	setup_env
-	for ((i=0; i < $build_tgt_cnt; i++))
+	for tgt in ${build_tgts[@]}
 	do
-		var=${build_tgts[$i]}
-		echo 'start to make' $var
-		make $var -j4
+		echo 'start to make' $tgt
+		make $tgt -j4
 	done
 
 	echo "make all of targets done!"
@@ -152,12 +150,11 @@ function update_tgts()
 	avbtool=out/host/linux-x86/bin/avbtool
 	TEST_KEY_PATH=external/avb/test/data
 
-	for ((i=0; i < $update_tgt_cnt; i++))
+	for tgt in ${update_tgts[@]}
 	do
-		var=${update_tgts[$i]}
-		echo "start to rebuild $var.img"
+		echo "start to rebuild $tgt.img"
 
-		cp $PRODUCT_OUT/$var.img $FLASHFILES/$var.img
+		cp $PRODUCT_OUT/$tgt.img $FLASHFILES/$tgt.img
 
 		$avbtool make_vbmeta_image --output $FLASHFILES/vbmeta.img \
 			--include_descriptors_from_image $FLASHFILES/boot.img \
@@ -171,9 +168,9 @@ function update_tgts()
 	adb reboot bootloader
 	fastboot flashing unlock
 	
-	for var in ${update_tgts[@]}; do
-		echo "fastboot flash $var $var.img now."
-		fastboot flash $var $FLASHFILES/$var.img
+	for tgt in ${update_tgts[@]}; do
+		echo "fastboot flash $tgt $tgt.img now."
+		fastboot flash $tgt $FLASHFILES/$tgt.img
 	done
 
 	fastboot flash vbmeta $FLASHFILES/vbmeta.img

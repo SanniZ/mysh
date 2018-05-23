@@ -80,11 +80,10 @@ help_menu=(
 	"		update vendorimage"
 	)
 
-function usage_help()
-{
-	for ((i=0; i < ${#help_menu[*]}; i++))
+function usage_help() {
+	for help in ${help_menu[@]}
 	do
-		echo ${help_menu[$i]}
+		echo ${help}
 	done
 }
 

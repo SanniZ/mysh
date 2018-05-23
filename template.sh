@@ -11,36 +11,36 @@ IFS=','
 
 LOCAL_PATH=$(pwd)
 
-opt_rm=false
+opt_xxx=false
 
-rm_list=()
-rm_list_cnt=0
+xxx_list=()
+xxx_list_cnt=0
 
 help_menu=(
 	"====================================="
-	"    linux command set"
+	"    xxx command set"
 	"====================================="
 	"[options]:[rm [file or folder]]"
-	"  rm | remove"
-	"    remove special string files."
+	"  xxx | xxxx"
+	"    xxxxxxxxx."
 	)
 
 function usage_help() {
 	for help in ${help_menu[@]}
 	do
-		echo ${help}
+		echo $help
 	done
 }
 
-function set_remove_list() {
- 	rm_list[$rm_list_cnt]=$1
- 	let rm_list_cnt+=1
+function set_xxx_list() {
+ 	xxx_list[$xxx_list_cnt]=$1
+ 	let xxx_list_cnt+=1
 }
 
-function do_remove_list() {
-	for ((i = 0; i < ${rm_list_cnt}; i++))
+function do_xxx_list() {
+	for var in ${xxx_list[@]}
 	do
-		rm -rf $LOCAL_PATH/${rm_list[$i]}
+		echo ${var}
 	done
 }
  
@@ -50,12 +50,12 @@ else
 	for var in $@
 	do
 		case $var in
-		'rm' | 'remove')
-			opt_rm=true
+		'xxx' | 'xxxx')
+			opt_xxx=true
 		;;
 		*)
-			if [ $opt_rm == true ]; then
-				set_remove_list $var
+			if [ $opt_xxx == true ]; then
+				set_xxx_list $var
 			else
 				usage_help
 			fi
@@ -64,6 +64,6 @@ else
 	done
 fi
 
-if [ $opt_rm == true ]; then
-	do_remove_list
+if [ $opt_xxx == true ]; then
+	do_xxx_list
 fi

@@ -32,12 +32,11 @@ help_menu=(
 	)
 
 function usage_help() {
-	for ((i=0; i < ${#help_menu[*]}; i++))
+	for help in ${help_menu[@]}
 	do
-		echo ${help_menu[$i]}
+		echo ${help}
 	done
 }
-
 
 function update_fw() {
 	echo 'update firmware...'
