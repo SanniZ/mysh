@@ -7,6 +7,8 @@
 
 #set -x
 
+IFS=','
+
 LOCAL_PATH=$(pwd)
 
 SSH_URL="ssh://android.intel.com/manifests -b android/master -m r0"
@@ -20,48 +22,60 @@ FLASHFILES=$PRODUCT_OUT/$PRO-flashfiles-eng.yingbin
 FW="ifwi_gr_mrb_b1.bin"
 IOC="ioc_firmware_gp_mrb_fab_e_slcan.ias_ioc"
 
-make_tgts=();
-make_tgt_cnt=0;
+build_tgts=();
+build_tgt_cnt=0;
 
 update_tgts=();
 update_tgt_cnt=0;
-	
+
+remove_tgts=();
+remove_tgt_cnt=0;
+
+help_menu=(
+	"====================================="
+	"    gordon_peak command set"
+	"====================================="
+	"[options]"
+	"	ba | flash | flashfiles:"
+	"		make flashfiles"
+	"	bb | boot | bootimage:"
+	"		make bootimage"
+	"	bs | sys | system | systemimage:"
+	"		make systemimage"
+	"	bt | tos | tosimage:"
+	"		make tosimage"
+	"	bv | vendor | vendorimage:"
+	"		make vendorimage"
+	"	fw:"
+	"		update firmware"
+	"	init:"
+	"		repo init and sync source code"
+	"	ioc:"
+	"		update ioc"
+	"	ro | rm_out:"
+	"		rm out folder"
+	"	rk | rm_kernel:"
+	"		clean obj/kernel"
+	"	rs | rm_soong:"
+	"		clean out/soong"
+	"	sync:"
+	"		repo sync source code"
+	"	ub | update_boot:"
+	"		update bootimage"
+	"	us | update_sys:"
+	"		update systemimage"
+	"	ut | update_tos:"
+	"		update tosimage"
+	"	uv | update_vendor:"
+	"		update vendorimage"
+	)
+
 function usage_help()
 {
-	echo "[options]"
-	echo "	-- ba | flash | flashfiles:"
-	echo "		make flashfiles"
-	echo "	-- bb | boot | bootimage:"
-	echo "		make bootimage"
-	echo "	-- bs | sys | system | systemimage:"
-	echo "		make systemimage"
-	echo "	-- bt | tos | tosimage:"
-	echo "		make tosimage"
-	echo "	-- bv | vendor | vendorimage:"
-	echo "		make vendorimage"
-	echo "	-- fw:"
-	echo "		update firmware"
-	echo "	-- init:"
-	echo "		repo init and sync source code"
-	echo "	-- ioc:"
-	echo "		update ioc"
-	echo "	-- ro | rm_out:"
-	echo "		rm out folder"
-	echo "	-- rk | rm_kernel:"
-	echo "		clean obj/kernel"
-	echo "	-- rs | rm_soong:"
-	echo "		clean out/soong"
-	echo "	-- sync:"
-	echo "		repo sync source code"
-	echo "	-- ub | update_boot:"
-	echo "		update bootimage"
-	echo "	-- us | update_sys:"
-	echo "		update systemimage"
-	echo "	-- ut | update_tos:"
-	echo "		update tosimage"
-	echo "	-- uv | update_vendor:"
-	echo "		update vendorimage"
-
+	for ((i=0; i < ${#help_menu[*]}; i++))
+	do
+		echo ${help_menu[$i]}
+	done
 }
 
 function create_source_code() {
@@ -75,9 +89,20 @@ function sync_source_code() {
 	repo sync -j5
 }
 
-function remove_path() {
-	echo "start to remove " $1
-	rm -rf $1
+function set_remove_tgts() {
+	remove_tgts[$remove_tgt_cnt]=$1
+	let remove_tgt_cnt+=1
+}
+
+function remove_tgts() {
+	echo 'do remove tgts'
+	for tgt in ${remove_tgts[@]}
+	do
+		echo 'start to rm' $tgt
+		rm -rf $tgt
+	done
+	
+	echo 'all of targets are removed!!!'
 }
 
 function update_fw() {
@@ -98,18 +123,18 @@ function setup_env()
         rm -rf out/.lock
 }
 
-function set_make_tgts() {
-	make_tgts[$make_tgt_cnt]=$1
-	let make_tgt_cnt+=1
+function set_build_tgts() {
+	build_tgts[$build_tgt_cnt]=$1
+	let build_tgt_cnt+=1
 
 }
 
-function make_images()
+function build_tgts()
 {
 	setup_env
-	for ((i=0; i < $make_tgt_cnt; i++))
+	for ((i=0; i < $build_tgt_cnt; i++))
 	do
-		var=${make_tgts[$i]}
+		var=${build_tgts[$i]}
 		echo 'start to make' $var
 		make $var -j4
 	done
@@ -122,7 +147,7 @@ function set_update_tgts() {
 	let update_tgt_cnt+=1
 }
 
-function update_images()
+function update_tgts()
 {
 	avbtool=out/host/linux-x86/bin/avbtool
 	TEST_KEY_PATH=external/avb/test/data
@@ -175,19 +200,19 @@ else
 	do
 		case $var in
 		'ba' | 'flash' | 'flashfiles')
-			set_make_tgts flashfiles
+			set_build_tgts flashfiles
 		;;
 		'bb' | 'boot' | 'bootimage')
-			set_make_tgts bootimage
+			set_build_tgts bootimage
 		;;
 		'bs' | 'sys' | 'system' | 'systemimage')
-			set_make_tgts systemimage
+			set_build_tgts systemimage
 		;;
 		'bt' | 'tos' | 'tosimage')
-			set_make_tgts tosimage
+			set_build_tgts tosimage
 		;;
 		'bv' | 'vendor' | 'vendorimage')
-			set_make_tgts vendorimage
+			set_build_tgts vendorimage
 		;;
 		'fw')
 			update_fw
@@ -202,13 +227,13 @@ else
 			update_ioc
 		;;
 		'ro' | 'rm_out')
-			remove_path out/
+			rset_remove_tgts out/
 		;;
 		'rk' | 'rm_kernel')
-			remove_path out/target/produce/$PRO/obj/kernel
+			set_remove_tgts out/target/produce/$PRO/obj/kernel
 		;;
 		'rs' | 'rm_soong')
-			remove_path out/soong
+			set_remove_tgts out/soong
 		;;
 		'sync')
 			sync_source_code
@@ -233,10 +258,14 @@ else
 	done
 fi
 
-if [ $make_tgt_cnt != 0 ]; then
-	make_images
+if [ $remove_tgt_cnt != 0 ]; then
+	remove_tgts
+fi
+
+if [ $build_tgt_cnt != 0 ]; then
+	build_tgts
 fi
 
 if [ $update_tgt_cnt != 0 ]; then
-	update_images
+	update_tgts
 fi

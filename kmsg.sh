@@ -7,24 +7,31 @@
 
 #set -x
 
+IFS=','
+
 log_usr=false
 log_kmsg=false
 
-function usage_help()
-{
-	echo "====================================="
-	echo "	grep log for kernel"
-	echo "====================================="
-	echo "[options]: [kmsg] [[usr] [string]] [cmd]"
+help_menu=(
+	"====================================="
+	"	grep log for kernel"
+	"====================================="
+	"[options]: [kmsg] [[usr] [string]] [cmd]"
+	"  fpc | fp:"
+	"    grep log for fpc or fingerprint"
+	"  kmsg:"
+	"    cat /pro/kmsg for log"
+	"  trusty:"
+	"    grep log for trusty"
+	"  usr | user:"
+	"    grep log for user special string" 
+	)
 
-	echo "	-- fpc, fp:"
-	echo "		grep log for fpc or fingerprint"
-	echo "	-- kmsg:"
-	echo "		cat /pro/kmsg for log"
-	echo "	-- trusty:"
-	echo "		grep log for trusty"
-	echo "	-- usr, user:"
-	echo "		grep log for user special string" 
+function usage_help() {
+	for ((i=0; i < ${#help_menu[*]}; i++))
+	do
+		echo ${help_menu[$i]}
+	done
 }
 
 function log_grep() {

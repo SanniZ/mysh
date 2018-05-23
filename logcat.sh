@@ -7,21 +7,28 @@
 
 #set -x
 
+IFS=','
+
 log_usr=false
 
-function usage_help()
-{
-	echo "====================================="
-	echo "	grep log from logcat"
-	echo "====================================="
-	echo "[options]: [[usr] [string]] [cmd]"
+help_menu=(
+	"====================================="
+	"	grep log from logcat"
+	"====================================="
+	"[options]: [[usr] [string]] [cmd]"
+	"  all:"
+	"    grep log for all"
+	"  fp | fpc:"
+	"    grep log for fpc or fingerprint"
+	"  usr | user:"
+	"    grep log for user special string" 
+	)
 
-	echo "	-- all:"
-	echo "		grep log for all"
-	echo "	-- fp, fpc:"
-	echo "		grep log for fpc or fingerprint"
-	echo "	-- usr, user:"
-	echo "		grep log for user special string" 
+function usage_help() {
+	for ((i=0; i < ${#help_menu[*]}; i++))
+	do
+		echo ${help_menu[$i]}
+	done
 }
 
 function log_grep() {

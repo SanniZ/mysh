@@ -7,19 +7,33 @@
 
 #set -x
 
+IFS=','
+
 LOCAL_PATH=$(pwd)
 
 adb_tgts=();
 adb_tgt_cnt=0;
 
+
+help_menu=(
+	"====================================="
+	"    android command set"
+	"====================================="
+	'  rb | reboot'
+	'    adb reboot.'
+	'  rbl | reboot_bootloader'
+	'    adb reboot bootloader.'
+	'  rcv | recovery'
+	'    adb reboot recovery.'
+	)
+
 function usage_help() {
-	echo '--rb | reboot'
-	echo '    adb reboot.'
-	echo '--rbl | reboot_bootloader'
-	echo '    adb reboot bootloader.'
-	echo '--rcv | recovery'
-	echo '    adb reboot recovery.'
+	for ((i=0; i < ${#help_menu[*]}; i++))
+	do
+		echo ${help_menu[$i]}
+	done
 }
+
 
 function set_adb_tgts() {
 	adb_tgts[$adb_tgt_cnt]=$1

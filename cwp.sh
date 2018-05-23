@@ -7,24 +7,37 @@
 
 #set -x
 
+IFS=','
+
 LOCAL_PATH=$(pwd)
 
 FW="pub/ifwi_gr_mrb_b1.bin"
 IOC="pub/ioc_firmware_gp_mrb_fab_e.ias_ioc"
 
 
+help_menu=(
+	"====================================="
+	"    CWP platform command set"
+	"====================================="
+	'  env'
+	'    setup make env.'
+	'  f'
+	'    flash all images.'
+	'  fd'
+	'    flash data images.'
+	'  fw'
+	'    update firmware'
+	'  ioc'
+	'    update ioc'
+	)
+
 function usage_help() {
-	echo '--env'
-	echo '    setup make env.'
-	echo '--f'
-	echo '    flash all images.'
-	echo '--fd'
-	echo '    flash data images.'
-	echo '--fw'
-	echo '    update firmware'
-	echo '--ioc'
-	echo '    update ioc'
+	for ((i=0; i < ${#help_menu[*]}; i++))
+	do
+		echo ${help_menu[$i]}
+	done
 }
+
 
 function update_fw() {
 	echo 'update firmware...'
