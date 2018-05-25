@@ -19,7 +19,7 @@ LUNCH_PDT="$PDT-$OPT"
 
 USER="yingbin"
 
-PRODUCT_OUT=/out/target/product/$PDT
+PRODUCT_OUT=out/target/product/$PDT
 FLASHFILES=$PRODUCT_OUT/$PDT-flashfiles-eng.$USER
 
 FW="$FLASHFILES/ifwi_gr_mrb_b1.bin"
@@ -193,7 +193,7 @@ function do_update_tgts()
 
 	for tgt in $@
 	do
-		echo "make_vbmeta_image $tgt.img"
+		echo "make_vbmeta_image: $tgt.img"
 
 		cp $PRODUCT_OUT/$tgt.img $FLASHFILES/$tgt.img
 
