@@ -41,12 +41,12 @@ help_menu=(
 	"		make tosimage"
 	"	bv | vendor | vendorimage:"
 	"		make vendorimage"
-	"	fw:"
+	"	ffw:"
 	"		update firmware"
+	"	fioc:"
+	"		update ioc"
 	"	init:"
 	"		repo init and sync source code"
-	"	ioc:"
-	"		update ioc"
 	"	mmm:"
 	"		mmm make dir"
 	"	pdt:"
@@ -106,6 +106,10 @@ function update_config_set() {
 	elif [ $update_config_set == 'mmm' ]; then
 		build_mmm_path=$1
 		set_build_tgts mmm
+	elif [ $update_config_set == 'fw' ]; then
+		FW=$1
+	elif [ $update_config_set == 'ioc' ]; then
+		IOC=$1
 	fi
 
 	update_config_set=null
@@ -164,7 +168,7 @@ function set_bios_tgts() {
 function do_bios_tgts() {
 	for tgt in ${bios_tgts[@]}
 	do
-		if [ $tgt == 'ifw' ]; then
+		if [ $tgt == 'fw' ]; then
 			echo 'update firmware...'
 			sudo /opt/intel/platformflashtool/bin/ias-spi-programmer --write $FLASHFILES/$FW
 		elif [ $tgt == 'ioc' ]; then
@@ -291,8 +295,14 @@ else
 		'cfg')
 			show_config_info
 		;;
+		'ffw')
+			set_bios_tgts 'fw'
+		;;
+		'fioc')
+			set_bios_tgts 'ioc'
+		;;
 		'fw')
-			set_bios_tgts 'ifw'
+			update_config_set='fw'
 		;;
 		'help')
 			usage_help
@@ -301,7 +311,7 @@ else
 			set_code_tgts 'init'
 		;;
 		'ioc')
-			set_bios_tgts 'ioc'
+			update_config_set='ioc'
 		;;
 		'mm')
 			set_build_tgts 'mm'
@@ -351,6 +361,7 @@ else
 	done
 fi
 
+#set IFS
 IFS=' '
 
 if [ $bios_tgt_cnt != 0 ]; then
