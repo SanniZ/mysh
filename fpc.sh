@@ -7,8 +7,6 @@
 
 #set -x
 
-IFS=','
-
 LOCAL_PATH=$(pwd)
 
 SSH_URL="ssh://xfeng8-ubuntu2.sh.intel.com:29418/manifests -b master"
@@ -27,64 +25,53 @@ make_tgt_cnt=0;
 
 update_tgts=();
 update_tgt_cnt=0;
+	
+function usage_help()
+{
+	echo "[options]"
+	echo "	-- ba | flash | flashfiles:"
+	echo "		make flashfiles"
+	echo "	-- bb | boot | bootimage:"
+	echo "		make bootimage"
+	echo "	-- bft | build_fpc_test:"
+	echo "		build fpc_tee_test"
+	echo "	-- bs | sys | system | systemimage:"
+	echo "		make systemimage"
+	echo "	-- bt | tos | tosimage:"
+	echo "		make tosimage"
+	echo "	-- bv | vendor | vendorimage:"
+	echo "		make vendorimage"
+	echo "	-- fw:"
+	echo "		update firmware"
+	echo "	-- fts | fpc_test_s:"
+	echo "		run fpc_tee_test -s"
+	echo "	-- fte | fpc_test_e:"
+	echo "		run fpc_tee_test -e"
+	echo "	-- init:"
+	echo "		repo init and sync source code"
+	echo "	-- ioc:"
+	echo "		update ioc"
+	echo "	-- pft | push_fpc_test:"
+	echo "		push fpc_tee_test to /data"
+	echo "	-- pp | push_patch:"
+	echo "		push patch to gerrit"
+	echo "	-- ro | rm_out:"
+	echo "		rm out folder"
+	echo "	-- rk | rm_kernel:"
+	echo "		clean obj/kernel"
+	echo "	-- rs | rm_soong:"
+	echo "		clean out/soong"
+	echo "	-- sync:"
+	echo "		repo sync source code"
+	echo "	-- ub | update_boot:"
+	echo "		update bootimage"
+	echo "	-- us | update_sys:"
+	echo "		update systemimage"
+	echo "	-- ut | update_tos:"
+	echo "		update tosimage"
+	echo "	-- uv | update_vendor:"
+	echo "		update vendorimage"
 
-remove_tgts=();
-remove_tgt_cnt=0;
-
-help_menu=(
-	"====================================="
-	"    fpc gordon_peak command set"
-	"====================================="
-	"[options]:",
-	"	ba | flash | flashfiles:"
-	"		make flashfiles"
-	"	bb | boot | bootimage:"
-	"		make bootimage"
-	"	bft | build_fpc_test:"
-	"		build fpc_tee_test"
-	"	bs | sys | system | systemimage:"
-	"		make systemimage"
-	"	bt | tos | tosimage:"
-	"		make tosimage"
-	"	bv | vendor | vendorimage:"
-	"		make vendorimage"
-	"	fw:"
-	"		update firmware"
-	"	fts | fpc_test_s:"
-	"		run fpc_tee_test -s"
-	"	fte | fpc_test_e:"
-	"		run fpc_tee_test -e"
-	"	init:"
-	"		repo init and sync source code"
-	"	ioc:"
-	"		update ioc"
-	"	pft | push_fpc_test:"
-	"		push fpc_tee_test to /data"
-	"	pp | push_patch:"
-	"		push patch to gerrit"
-	"	ro | rm_out:"
-	"		rm out folder"
-	"	rk | rm_kernel:"
-	"		clean obj/kernel"
-	"	rs | rm_soong:"
-	"		clean out/soong"
-	"	sync:"
-	"		repo sync source code"
-	"	ub | update_boot:"
-	"		update bootimage"
-	"	us | update_sys:"
-	"		update systemimage"
-	"	ut | update_tos:"
-	"		update tosimage"
-	"	uv | update_vendor:"
-	"		update vendorimage"
-	)
-
-function usage_help() {
-	for help in ${help_menu[@]}
-	do
-		echo ${help}
-	done
 }
 
 function create_source_code() {
@@ -98,20 +85,9 @@ function sync_source_code() {
 	repo sync -j5
 }
 
-function set_remove_tgts() {
-	remove_tgts[$remove_tgt_cnt]=$1
-	let remove_tgt_cnt+=1
-}
-
-function remove_tgts() {
-	echo 'do remove tgts'
-	for tgt in ${remove_tgts[@]}
-	do
-		echo 'start to rm' $tgt
-		rm -rf $tgt
-	done
-	
-	echo 'all of targets are removed!!!'
+function remove_path() {
+	echo "start to remove " $1
+	rm -rf $1
 }
 
 function update_fw() {
@@ -136,18 +112,20 @@ function setup_env()
         rm -rf out/.lock
 }
 
-function set_build_tgts() {
+function set_make_tgts() {
 	make_tgts[$make_tgt_cnt]=$1
 	let make_tgt_cnt+=1
+
 }
 
-function build_tgts()
+function make_images()
 {
-	#setup_env
-	for tgt in ${make_tgts[@]}
+	setup_env
+	for ((i=0; i < $make_tgt_cnt; i++))
 	do
-		echo 'start to make' $tgt
-		make $tgt -j4
+		var=${make_tgts[$i]}
+		echo 'start to make' $var
+		make $var -j4
 	done
 
 	echo "make all of targets done!"
@@ -158,16 +136,17 @@ function set_update_tgts() {
 	let update_tgt_cnt+=1
 }
 
-function update_tgts()
+function update_images()
 {
 	avbtool=out/host/linux-x86/bin/avbtool
 	TEST_KEY_PATH=external/avb/test/data
 
-	for tgt in ${update_tgts[@]}
+	for ((i=0; i < $update_tgt_cnt; i++))
 	do
-		echo "start to rebuild $tgt.img"
+		var=${update_tgts[$i]}
+		echo "start to rebuild $var.img"
 
-		cp $PRODUCT_OUT/$tgt.img $FLASHFILES/$tgt.img
+		cp $PRODUCT_OUT/$var.img $FLASHFILES/$var.img
 
 		$avbtool make_vbmeta_image --output $FLASHFILES/vbmeta.img \
 			--include_descriptors_from_image $FLASHFILES/boot.img \
@@ -181,10 +160,9 @@ function update_tgts()
 	adb reboot bootloader
 	fastboot flashing unlock
 	
-	for tgt in ${update_tgts[@]}
-	do
-		echo "fastboot flash $tgt $tgt.img now."
-		fastboot flash $tgt $FLASHFILES/$tgt.img
+	for var in ${update_tgts[@]}; do
+		echo "fastboot flash $var $var.img now."
+		fastboot flash $var $FLASHFILES/$var.img
 	done
 
 	fastboot flash vbmeta $FLASHFILES/vbmeta.img
@@ -233,22 +211,22 @@ else
 	do
 		case $var in
 		'ba' | 'flash' | 'flashfiles')
-			set_build_tgts flashfiles
+			set_make_tgts flashfiles
 		;;
 		'bb' | 'boot' | 'bootimage')
-			set_build_tgts bootimage
+			set_make_tgts bootimage
 		;;
 		'bft' | 'build_fpc_test')
 			build_fpc_test
 		;;
 		'bs' | 'sys' | 'system' | 'systemimage')
-			set_build_tgts systemimage
+			set_make_tgts systemimage
 		;;
 		'bt' | 'tos' | 'tosimage')
-			set_build_tgts tosimage
+			set_make_tgts tosimage
 		;;
 		'bv' | 'vendor' | 'vendorimage')
-			set_build_tgts vendorimage
+			set_make_tgts vendorimage
 		;;
 		'fte' | 'fpc_test_e')
 			fpc_test -e
@@ -275,13 +253,13 @@ else
 			push_patch
 		;;
 		'ro' | 'rm_out')
-			set_remove_tgts out/
+			remove_path out/
 		;;
 		'rk' | 'rm_kernel')
-			set_remove_tgts out/target/produce/$PRO/obj/kernel
+			remove_path out/target/produce/$PRO/obj/kernel
 		;;
 		'rs' | 'rm_soong')
-			set_remove_tgts out/soong
+			remove_path out/soong
 		;;
 		'sync')
 			sync_source_code
@@ -306,14 +284,10 @@ else
 	done
 fi
 
-if [ $remove_tgt_cnt != 0 ]; then
-	remove_tgts
-fi
-
 if [ $make_tgt_cnt != 0 ]; then
-	build_tgts
+	make_images
 fi
 
 if [ $update_tgt_cnt != 0 ]; then
-	update_tgts
+	update_images
 fi
