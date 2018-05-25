@@ -22,8 +22,8 @@ USER="yingbin"
 PRODUCT_OUT=/out/target/product/$PDT
 FLASHFILES=$PRODUCT_OUT/$PDT-flashfiles-eng.$USER
 
-FW="ifwi_gr_mrb_b1.bin"
-IOC="ioc_firmware_gp_mrb_fab_e_slcan.ias_ioc"
+FW="$FLASHFILES/ifwi_gr_mrb_b1.bin"
+IOC="$FLASHFILES/ioc_firmware_gp_mrb_fab_e_slcan.ias_ioc"
 
 
 help_menu=(
@@ -43,6 +43,8 @@ help_menu=(
 	"		make vendorimage"
 	"	ffw:"
 	"		update firmware"
+	"	ffs:"
+	"		set path of flashfiles file"
 	"	fioc:"
 	"		update ioc"
 	"	init:"
@@ -103,6 +105,14 @@ function update_config_set() {
 		SSH_URL=$1
 	elif [ $update_config_set == 'pdt' ]; then
 		PDT=$1
+		LUNCH_PDT="$PDT-$OPT"
+		PRODUCT_OUT=/out/target/product/$PDT
+		FLASHFILES=$PRODUCT_OUT/$PDT-flashfiles-eng.$USER
+		FW="$FLASHFILES/ifwi_gr_mrb_b1.bin"
+		IOC="$FLASHFILES/ioc_firmware_gp_mrb_fab_e_slcan.ias_ioc"
+	elif [ $update_config_set == 'opt' ]; then
+		OPT=$1
+		LUNCH_PDT="$PDT-$OPT"
 	elif [ $update_config_set == 'mmm' ]; then
 		build_mmm_path=$1
 		set_build_tgts mmm
@@ -110,6 +120,8 @@ function update_config_set() {
 		FW=$1
 	elif [ $update_config_set == 'ioc' ]; then
 		IOC=$1
+	elif [ $update_config_set == 'ffs' ]; then
+		FLASHFILES=$1
 	fi
 
 	update_config_set=null
@@ -170,10 +182,10 @@ function do_bios_tgts() {
 	do
 		if [ $tgt == 'fw' ]; then
 			echo 'update firmware...'
-			sudo /opt/intel/platformflashtool/bin/ias-spi-programmer --write $FLASHFILES/$FW
+			sudo /opt/intel/platformflashtool/bin/ias-spi-programmer --write $FW
 		elif [ $tgt == 'ioc' ]; then
 			echo 'update IOC...'
-			sudo /opt/intel/platformflashtool/bin/ioc_flash_server_app -s /dev/ttyUSB2 -grfabc -t $FLASHFILES/$IOC
+			sudo /opt/intel/platformflashtool/bin/ioc_flash_server_app -s /dev/ttyUSB2 -grfabc -t $IOC
 		fi
 	done
 	
@@ -297,6 +309,9 @@ else
 		;;
 		'ffw')
 			set_bios_tgts 'fw'
+		;;
+		'ffs')
+			update_config_set='ffs'
 		;;
 		'fioc')
 			set_bios_tgts 'ioc'
