@@ -2,7 +2,7 @@
 
 # ------------------------------------------------
 #  Author: Byng.Zeng
-#  Date:   2018-05-23
+#  Date:   2018-05-24
 # ------------------------------------------------
 
 #set -x
@@ -11,21 +11,13 @@ IFS=','
 
 LOCAL_PATH=$(pwd)
 
-help_menu=(
-	IFS=','
-	"====================================="
-	"    xxx command set"
-	"====================================="
-	"[options]:[rm [file or folder]]"
-	"  xxx | xxxx"
-	"    xxxxxxxxx."
-	)
+help_menu=('')
 
 function usage_help() {
 	pdt-common.sh help
 	for help in ${help_menu[@]}
 	do
-		echo $help
+		echo ${help}
 	done
 }
 
@@ -38,40 +30,22 @@ function set_undo_cmd_list() {
 }
 
 
-xxx_tgts=()
-xxx_tgt_cnt=0
-
-function set_xxx_tgts() {
- 	xxx_tgts[$xxx_tgt_cnt]=$1
- 	let xxx_tgt_cnt+=1
-}
-
-function do_xxx_tgts() {
-	for tgt in ${xxx_tgt[@]}
-	do
-		echo ${tgt}
-	done
-}
-
+# main
 if [ $# == 0 ]; then
 	usage_help
 else
 	for var in $@
 	do
 		case $var in
-		'xxx' | 'xxxx')
-			set_xxx_tgts 'xxx'
+		'help')
+			usage_help
 		;;
 		*)
-			set_undo_cmd_tgts $var
+			set_undo_cmd_list $var
 		;;
 		esac
 	done
-	
-	if [ $xxx_list_cnt != 0 ]; then
-		do_xxx_tgts
-	fi
-	
+
 	# call gordonpeak-common
 	if [ ${undo_cmd_list} != null ]; then
 		pdt-common.sh ${undo_cmd_list[@]}
