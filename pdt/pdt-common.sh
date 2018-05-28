@@ -96,32 +96,75 @@ function show_config_info() {
 	echo 'IOC         :' $IOC
 }
 
-set_opt_args_pending=null
+help_tgts=()
+help_tgt_cnt=0
 
-function set_opt_args() {
-	if [ $set_opt_args_pending == 'url' ]; then
-		SSH_URL=$1
-	elif [ $set_opt_args_pending == 'pdt' ]; then
-		PDT=$1
-		LUNCH_PDT="$PDT-$OPT"
-		PRODUCT_OUT=/out/target/product/$PDT
-		FLASHFILES=$PRODUCT_OUT/$PDT-flashfiles-eng.$USER
-		FW="$FLASHFILES/ifwi_gr_mrb_b1.bin"
-		IOC="$FLASHFILES/ioc_firmware_gp_mrb_fab_e_slcan.ias_ioc"
-	elif [ $set_opt_args_pending == 'opt' ]; then
-		OPT=$1
-		LUNCH_PDT="$PDT-$OPT"
-	elif [ $set_opt_args_pending == 'mmm' ]; then
-		set_opt_tgts 'mmm' $1
-	elif [ $set_opt_args_pending == 'fw' ]; then
-		FW=$1
-	elif [ $set_opt_args_pending == 'ioc' ]; then
-		IOC=$1
-	elif [ $set_opt_args_pending == 'ffs' ]; then
-		FLASHFILES=$1
-	fi
+function set_help_tgt() {
+	for tgt in $@
+	do
+		help_tgts[$help_tgt_cnt]=$tgt
+		let help_tgt_cnt+=1
+	done
+}
 
-	set_opt_args_pending=null
+function do_help_tgts() {
+	for tgt in ${help_tgts[@]}
+	do
+		if [ $tgt == 'help' ]; then
+			usage_help
+		elif [ $tgt == 'cfg' ]; then
+			show_config_info
+		fi
+	done
+}
+
+default_set_tgts=()
+default_set_tgt_cnt=0
+
+function set_default_tgt() {
+	for tgt in $@
+	do
+		default_set_tgts[$default_set_tgt_cnt]=$tgt
+		let default_set_tgt_cnt+=1
+	done
+}
+
+function update_default_set() {
+	pending_set=null
+	for tgt in ${default_set_tgts[@]}
+	do
+		if [ $pending_set == null ]; then
+			pending_set=$tgt
+		else
+			case $pending_set in
+			'url')
+				SSH_URL=$tgt
+			;;
+			'pdt')
+				PDT=$tgt
+				LUNCH_PDT="$PDT-$OPT"
+				PRODUCT_OUT=/out/target/product/$PDT
+				FLASHFILES=$PRODUCT_OUT/$PDT-flashfiles-eng.$USER
+				FW="$FLASHFILES/ifwi_gr_mrb_b1.bin"
+				IOC="$FLASHFILES/ioc_firmware_gp_mrb_fab_e_slcan.ias_ioc"
+			;;
+			'opt')
+				OPT=$tgt
+				LUNCH_PDT="$PDT-$OPT"
+			;;
+			'fw')
+				FW=$FLASHFILES/$tgt
+			;;
+			'ioc')
+				IOC=$FLASHFILES/$tgt
+			;;
+			'ffs')
+				FLASHFILES=$tgt
+			;;
+			esac
+			pending_set=null
+		fi
+	done
 }
 
 function setup_env()
@@ -131,8 +174,19 @@ function setup_env()
         lunch $LUNCH_PDT
 }
 
-function do_bios_tgts() {
+bios_tgts=()
+bios_tgt_cnt=0
+
+function set_bios_tgt() {
 	for tgt in $@
+	do
+		bios_tgts[$bios_tgt_cnt]=$tgt
+		let bios_tgt_cnt+=1
+	done
+}
+
+function do_bios_tgts() {
+	for tgt in ${bios_tgts[@]}
 	do
 		if [ $tgt == 'fw' ]; then
 			echo 'update firmware...'
@@ -144,12 +198,23 @@ function do_bios_tgts() {
 	done
 }
 
+build_tgts=()
+build_tgt_cnt=0
+build_pending=null
+
+function set_build_tgt() {
+	for tgt in $@
+	do
+		build_tgts[$build_tgt_cnt]=$tgt
+		let build_tgt_cnt+=1
+	done
+}
 
 function do_build_tgts()
 {
 	setup_env
 	rm -rf out/.lock
-	for tgt in $@
+	for tgt in ${build_tgts[@]}
 	do
 		if [ $tgt == 'mmm' ]; then
 			build_pending='mmm'
@@ -164,8 +229,19 @@ function do_build_tgts()
 	done
 }
 
-function do_code_tgts() {
+code_tgts=()
+code_tgt_cnt=0
+
+function set_code_tgt() {
 	for tgt in $@
+	do
+		code_tgts[$code_tgt_cnt]=$tgt
+		let code_tgt_cnt+=1
+	done
+}
+
+function do_code_tgts() {
+	for tgt in ${code_tgts[@]}
 	do
 		if [ $tgt == 'init' ]; then
 			echo "init and sync source code........"
@@ -177,8 +253,19 @@ function do_code_tgts() {
 	done
 }
 
-function do_remove_tgts() {
+remove_tgts=()
+remove_tgt_cnt=0
+
+function set_remove_tgt() {
 	for tgt in $@
+	do
+		remove_tgts[$remove_tgt_cnt]=$tgt
+		let remove_tgt_cnt+=1
+	done
+}
+
+function do_remove_tgts() {
+	for tgt in ${remove_tgts[@]}
 	do
 		echo 'rm' $tgt
 		rm -rf $tgt
@@ -186,12 +273,31 @@ function do_remove_tgts() {
 }
 
 
+function root_device()
+{
+	adb wait-for-device
+	adb root
+	adb wait-for-device
+}
+
+
+update_tgts=()
+update_tgt_cnt=0
+
+function set_update_tgt() {
+	for tgt in $@
+	do
+		update_tgts[$update_tgt_cnt]=$tgt
+		let update_tgt_cnt+=1
+	done
+}
+
 function do_update_tgts()
 {
 	avbtool=out/host/linux-x86/bin/avbtool
 	TEST_KEY_PATH=external/avb/test/data
 
-	for tgt in $@
+	for tgt in ${update_tgts[@]}
 	do
 		echo "make_vbmeta_image: $tgt.img"
 
@@ -209,7 +315,7 @@ function do_update_tgts()
 	adb reboot bootloader
 	fastboot flashing unlock
 	
-	for tgt in $@
+	for tgt in ${update_tgts[@]}
 	do
 		echo "fastboot flash $tgt $tgt.img"
 		fastboot flash $tgt $FLASHFILES/$tgt.img
@@ -223,170 +329,106 @@ function do_update_tgts()
 
 
 
-opt_tgts=()
-opt_tgt_cnt=0
-opt_tgt_pending=null
+pending_tgt=null
 
-function set_opt_tgts() {
-	for tgt in $@
-	do
-		opt_tgts[$opt_tgt_cnt]=$tgt
-		let opt_tgt_cnt+=1
-	done
-}
-
-function do_opt_tgts() {
-	for tgt in ${opt_tgts[@]}
-	do
-		case $tgt in
-		'build')
-			opt_tgt_pending='build'
-		;;
-		'cfg')
-			show_config_info
-		;;
-		'ffw')
-			do_bios_tgts 'fw'
-		;;
-		'fioc')
-			do_bios_tgts 'ioc'
-		;;
-		'help')
-			usage_help
-		;;
-		'init')
-			do_code_tgts 'init' 'sync'
-		;;
-		'mmm')
-			opt_tgt_pending='mmm'
-		;;
-		'rm')
-			opt_tgt_pending='rm'
-		;;
-		'sync')
-			do_code_tgts 'sync'
-		;;
-		'update')
-			opt_tgt_pending='update'
-		;;
-		*)
-			case  $opt_tgt_pending in
-			'build')
-				do_build_tgts $tgt
-			;;
-			'mmm')
-				do_build_tgts 'mmm' $tgt
-			;;
-			'rm')
-				do_remove_tgts $tgt
-			;;
-			'update')
-				do_update_tgts $tgt
-			;;
-			*)
-				echo 'Found unknown pending opt:' $opt_tgt_pending
-			;;
-			esac
-			opt_tgt_pending=null
-		;;
-		esac
-	done
+function do_pending_tgts() {
+	if [ $pending_tgt == 'mmm' ]; then
+		set_build_tgt $1 $2
+	else
+		set_default_tgt $1 $2
+	fi
 	
-	echo 'all of opt done!!!'
-}
-
-function root_device()
-{
-	adb wait-for-device
-	adb root
-	adb wait-for-device
+	pending_tgt=null
 }
 
 
 #=======================================
 # main entry
+#     Check all of args.
+#     do nothing if found invalid args.
 #=======================================
 if [ $# == 0 ]; then
 	usage_help
+	exit
 else
 	for var in $@
 	do
 		case $var in
 		'ba' | 'flash' | 'flashfiles')
-			set_opt_tgts 'build' 'flashfiles'
+			set_build_tgt 'flashfiles'
 		;;
 		'bb' | 'boot' | 'bootimage')
-			set_opt_tgts 'build' 'bootimage'
+			set_build_tgt 'bootimage'
 		;;
 		'bs' | 'sys' | 'system' | 'systemimage')
-			set_opt_tgts 'build' 'systemimage'
+			set_build_tgt 'systemimage'
 		;;
 		'bt' | 'tos' | 'tosimage')
-			set_opt_tgts 'build' 'tosimage'
+			set_build_tgt 'tosimage'
 		;;
 		'bv' | 'vendor' | 'vendorimage')
-			set_opt_tgts 'build' 'vendorimage'
+			set_build_tgt 'vendorimage'
 		;;
 		'cfg')
-			set_opt_tgts 'cfg'
+			set_help_tgt 'cfg'
 		;;
 		'ffw')
-			set_opt_tgts 'ffw'
+			set_bios_tgt 'fw'
 		;;
 		'ffs')
-			set_opt_args_pending='ffs'
+			pending_tgt='ffs'
 		;;
 		'fioc')
-			set_opt_tgts 'fioc'
+			set_bios_tgt 'ioc'
 		;;
 		'fw')
-			set_opt_args_pending='fw'
+			pending_tgt='fw'
 		;;
 		'help')
-			set_opt_tgts 'help'
+			set_help_tgt 'help'
 		;;
 		'init')
-			set_opt_tgts 'init'
+			set_code_tgt 'init'
 		;;
 		'ioc')
-			set_opt_args_pending='ioc'
+			pending_tgt='ioc'
 		;;
 		'mmm')
-			set_opt_args_pending='mmm'
+			pending_tgt='mmm'
 		;;
 		'pdt')
-			set_opt_args_pending='pdt'
+			pending_tgt='pdt'
 		;;
 		'ro' | 'rm_out')
-			set_opt_tgts 'rm' 'out/'
+			set_remove_tgt 'rm' 'out/'
 		;;
 		'rk' | 'rm_kernel')
-			set_opt_tgts 'rm' "out/target/produce/$PDT/obj/kernel"
+			set_remove_tgt 'rm' "out/target/produce/$PDT/obj/kernel"
 		;;
 		'rs' | 'rm_soong')
-			set_opt_tgts 'rm' 'out/soong'
+			set_remove_tgt 'rm' 'out/soong'
 		;;
 		'sync')
-			set_opt_tgts 'sync'
+			set_code_tgt 'sync'
 		;;
 		'ub' | 'update_boot')
-			set_update_tgts 'update' 'boot'
+			set_update_tgt 'boot'
 		;;
 		'url')
-			set_opt_args_pending='url'
+			pending_tgt='url'
 		;;
 		'us' | 'update_sys')
-			set_opt_tgts 'update' 'system'
+			set_update_tgt 'system'
 		;;
 		'ut' | 'update_tos')
-			set_opt_tgts 'update' 'tos'
+			set_update_tgt 'tos'
 		;;
 		'uv' | 'update_vendor')
-			set_opt_tgts 'update' 'vendor'
+			set_update_tgt 'vendor'
 		;;
 		*)
-			if [ $set_opt_args_pending != null ]; then
-				set_opt_args $var
+			if [ $pending_tgt != null ]; then
+				do_pending_tgts $pending_tgt $var
 			else
 				echo "Found unknown cmd($var) and return..."
 				exit
@@ -399,6 +441,31 @@ fi
 #set IFS
 IFS=' '
 
-if [ $opt_tgt_cnt != 0 ]; then
-	do_opt_tgts
+# do options
+if [ $default_set_tgt_cnt != 0 ]; then
+	update_default_set
+fi
+
+if [ $help_tgt_cnt != 0 ]; then
+	do_help_tgts
+fi
+
+if [ $bios_tgt_cnt != 0 ]; then
+	do_bios_tgts
+fi
+
+if [ $remove_tgt_cnt != 0 ]; then
+	do_remove_tgts
+fi
+
+if [ $code_tgt_cnt != 0 ]; then
+	do_code_tgts
+fi
+
+if [ $build_tgt_cnt != 0 ]; then
+	do_build_tgts
+fi
+
+if [ $update_tgt_cnt != 0 ]; then
+	do_update_tgts
 fi
