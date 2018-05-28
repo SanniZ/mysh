@@ -400,13 +400,13 @@ else
 			pending_tgt='pdt'
 		;;
 		'ro' | 'rm_out')
-			set_remove_tgt 'rm' 'out/'
+			set_remove_tgt 'out/'
 		;;
 		'rk' | 'rm_kernel')
-			set_remove_tgt 'rm' "out/target/produce/$PDT/obj/kernel"
+			set_remove_tgt "out/target/produce/$PDT/obj/kernel"
 		;;
 		'rs' | 'rm_soong')
-			set_remove_tgt 'rm' 'out/soong'
+			set_remove_tgt 'out/soong'
 		;;
 		'sync')
 			set_code_tgt 'sync'
