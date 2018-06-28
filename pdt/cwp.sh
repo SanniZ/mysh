@@ -16,7 +16,7 @@ SSH_URL="ssh://android.intel.com/h/hypervisor/manifests -b hypervisor/master"
 FW="pub/ifwi_gr_mrb_b1.bin"
 IOC="pub/ioc_firmware_gp_mrb_fab_e.ias_ioc"
 
-CPU=$(cat /proc/cpuinfo| grep "processor"| wc -l)
+# CPU=$(cat /proc/cpuinfo| grep "processor"| wc -l)
 
 opt_build_log=null
 
@@ -55,9 +55,9 @@ function make_opts() {
 		if [ -e $opt_build_log ]; then
 			mv $opt_build_log ${opt_build_log}.old
 		fi
-		make $1 2>&1 -j$CPU | tee $opt_build_log
+		make $1 2>&1 | tee $opt_build_log
 	else
-		make $1 -j$CPU
+		make $1
 	fi
 }
 
