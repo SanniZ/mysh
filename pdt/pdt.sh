@@ -318,7 +318,7 @@ opt_set_menu=(
 
 function print_opt_set_enum() {
 	IFS=''
-	for help in ${opt_args_menu[@]}
+	for help in ${opt_set_menu[@]}
 	do
 		echo ${help}
 	done
@@ -336,7 +336,7 @@ if [ $# == 0 ]; then
 	exit
 else
 	# update default settings.
-	while getopts "C:f:F:i:I:g:L:m:o:O:p:S:u:h" opt
+	while getopts "C:f:F:hi:I:g:L:m:o:O:p:S:u:h" opt
 	do
 		case $opt in
 			C)

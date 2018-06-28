@@ -58,14 +58,14 @@ done
 
 if [ ${log_file} == null ]; then
 	if [ ${log_txt} == null ]; then
-		log.sh -k
+		log.sh -d
 	else
-		log.sh -k -t ${log_txt}
+		log.sh -d -t ${log_txt}
 	fi
 else
 	if [ ${log_txt} == null ]; then
-		log.sh -k -g ${log_file}
+		log.sh -d -g ${log_file}
 	else
-		log.sh -k -t ${log_txt} -g ${log_file}
+		log.sh -d -t ${log_txt} -g ${log_file}
 	fi
 fi

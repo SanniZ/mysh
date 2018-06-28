@@ -2,7 +2,7 @@
 
 # ------------------------------------------------
 #  Author: Byng.Zeng
-#  Date:   2018-05-23
+#  Date:   2018-05-28
 # ------------------------------------------------
 
 #set -x
@@ -11,59 +11,64 @@ IFS=','
 
 LOCAL_PATH=$(pwd)
 
-opt_rm=false
 
-rm_list=()
-rm_list_cnt=0
 
-help_menu=(
-	"====================================="
-	"    linux command set"
-	"====================================="
-	"[options]:[rm [file or folder]]"
-	"  rm | remove"
-	"    remove special string files."
-	)
+
+help_menu=()
+
+opt_set_menu=(
+	'-r:'
+	'	rm files.'
+)
+
+function print_opt_set_enum() {
+	IFS=''
+	for help in ${opt_set_menu[@]}
+	do
+		echo ${help}
+	done
+}
 
 function usage_help() {
 	for help in ${help_menu[@]}
 	do
 		echo ${help}
 	done
+	print_opt_set_enum
 }
 
-function set_remove_list() {
- 	rm_list[$rm_list_cnt]=$1
- 	let rm_list_cnt+=1
+opt_rm_tgts=()
+opt_rm_tgt_cnt=0
+
+function set_remove_opt() {
+ 	opt_rm_tgts[$opt_rm_tgt_cnt]=$1
+ 	let opt_rm_tgt_cnt+=1
 }
 
-function do_remove_list() {
-	for ((i = 0; i < ${rm_list_cnt}; i++))
+function do_remove_tgts() {
+	for ((i = 0; i < ${opt_rm_tgt_cnt}; i++))
 	do
-		rm -rf $LOCAL_PATH/${rm_list[$i]}
+		rm -rf ${opt_rm_tgts[$i]}
 	done
 }
  
 if [ $# == 0 ]; then
 	usage_help
 else
-	for var in $@
+	while getopts 'hr:' opt
 	do
-		case $var in
-		'rm' | 'remove')
-			opt_rm=true
+		case $opt in
+		h)
+			print_opt_set_enum
+			exit
 		;;
-		*)
-			if [ $opt_rm == true ]; then
-				set_remove_list $var
-			else
-				usage_help
-			fi
+		r)
+			set_remove_opt $OPTARG
 		;;
 		esac
 	done
 fi
 
-if [ $opt_rm == true ]; then
-	do_remove_list
+if [ $opt_rm_tgt_cnt != 0 ]; then
+	do_remove_tgts
 fi

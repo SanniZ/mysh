@@ -34,7 +34,7 @@ function usage_help() {
 	do
 		echo ${help}
 	done
-	pdt-common.sh help
+	pdt.sh help
 }
 
 
@@ -107,6 +107,6 @@ else
 
 	# call gordonpeak-common
 	if [ ${undo_cmd_list} != null ]; then
-		pdt-common.sh ${undo_cmd_list[@]}
+		pdt.sh ${undo_cmd_list[@]}
 	fi
 fi
