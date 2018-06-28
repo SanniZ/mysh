@@ -14,11 +14,11 @@ LOCAL_PATH=$(pwd)
 help_menu=('')
 
 function usage_help() {
-	pdt-common.sh help
 	for help in ${help_menu[@]}
 	do
 		echo ${help}
 	done
+	pdt-common.sh help
 }
 
 undo_cmd_list=null

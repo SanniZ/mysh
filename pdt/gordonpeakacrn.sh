@@ -16,11 +16,11 @@ PDT="gordon_peak_acrn"
 help_menu=()
 
 function usage_help() {
-	pdt-common.sh help
 	for help in ${help_menu[@]}
 	do
 		echo ${help}
 	done
+	pdt-common.sh help
 }
 
 undo_cmd_list=null
@@ -37,7 +37,7 @@ function set_undo_cmd_list() {
 if [ $# == 0 ]; then
 	usage_help
 else
-	set_undo_cmd_list pdt $PDT
+	set_undo_cmd_list -p $PDT
 	for var in $@
 	do
 		case $var in

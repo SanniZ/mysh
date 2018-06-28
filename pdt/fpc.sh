@@ -30,11 +30,11 @@ help_menu=(
 	)
 
 function usage_help() {
-	pdt-common.sh help
 	for help in ${help_menu[@]}
 	do
 		echo ${help}
 	done
+	pdt-common.sh help
 }
 
 
@@ -76,7 +76,7 @@ if [ $# == 0 ]; then
 	usage_help
 else
 	# set fpc url
-	set_undo_cmd_list url $SSH_URL
+	set_undo_cmd_list -u $SSH_URL
 
 	for var in $@
 	do
