@@ -55,9 +55,9 @@ function make_opts() {
 		if [ -e $opt_build_log ]; then
 			mv $opt_build_log ${opt_build_log}.old
 		fi
-		make $1 2>&1 | tee $opt_build_log
+		make $1 2>&1 -j$CPU | tee $opt_build_log
 	else
-		make $1
+		make $1 -j$CPU
 	fi
 }
 
