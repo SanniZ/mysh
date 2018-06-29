@@ -73,8 +73,8 @@ function do_xxx_tgts() {
 	done
 }
 
-opt_set_cnt=0
-opt_set_index=0
+index=1
+opt_index=$OPTIND
 
 if [ $# == 0 ]; then
 	usage_help
@@ -95,8 +95,8 @@ else
 
 	for var in $@
 	do
-		if [ ${opt_set_index} -lt ${opt_set_cnt} ]; then
-			let opt_set_index+=1
+		if [ $index -lt $opt_index ]; then #it is opt args, do nothing.
+			let index++
 		else
 			case $var in
 			'xxx' | 'xxxx')

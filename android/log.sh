@@ -13,12 +13,6 @@ log_type=null
 log_txt=null
 log_file=null
 
-help_menu=(
-	'===================================='
-	'    log command set'
-	'===================================='
-)
-
 opt_set_menu=(
 	'  -c:'
 	'    get logcat log'
@@ -39,6 +33,12 @@ function print_opt_set_enum() {
 		echo ${set}
 	done
 }
+
+help_menu=(
+	'===================================='
+	'    log command set'
+	'===================================='
+)
 
 function usage_help() {
 	for help in ${help_menu[@]}

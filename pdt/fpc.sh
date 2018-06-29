@@ -14,11 +14,9 @@ LOCAL_PATH=$(pwd)
 SSH_URL='ssh://xfeng8-ubuntu2.sh.intel.com:29418/manifests -b master'
 
 help_menu=(
-	IFS=','
 	"====================================="
 	"    fpc extra command set"
 	"====================================="
-	"[options]:",
 	"  bt | build_test:"
 	"    build fpc_tee_test"
 	"  ts | test_s:"
@@ -35,6 +33,7 @@ function usage_help() {
 		echo ${help}
 	done
 	pdt.sh help
+	pdt.sh -h
 }
 
 
@@ -96,6 +95,7 @@ function set_undo_cmd_list() {
 
 if [ $# == 0 ]; then
 	usage_help
+	exit
 else
 	# set fpc url
 	set_undo_cmd_list -u $SSH_URL
@@ -114,6 +114,7 @@ else
 		;;
 		'help')
 			usage_help
+			exit
 		;;
 		'pt' | 'push_test')
 			set_fpc_tgt 'push_test'

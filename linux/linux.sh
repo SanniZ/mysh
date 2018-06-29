@@ -59,6 +59,7 @@ function do_remove_tgts() {
  
 if [ $# == 0 ]; then
 	usage_help
+	exit
 else
 	while getopts 'hr:' opt
 	do

@@ -11,17 +11,6 @@ IFS=','
 
 LOCAL_PATH=$(pwd)
 
-adb_tgts=();
-adb_tgt_cnt=0;
-
-fastboot_tgts=();
-fastboot_tgt_cnt=0;
-
-help_menu=(
-	'===================================='
-	'    fastboot command set'
-	'===================================='
-)
 
 opt_set_menu=(
 	'  -B:'
@@ -50,6 +39,13 @@ function print_opt_set_enum() {
 	done
 }
 
+
+help_menu=(
+	'===================================='
+	'    fastboot command set'
+	'===================================='
+)
+
 function usage_help() {
 	for help in ${help_menu[@]}
 	do
@@ -58,6 +54,11 @@ function usage_help() {
 	print_opt_set_enum
 }
 
+adb_tgts=();
+adb_tgt_cnt=0;
+
+fastboot_tgts=();
+fastboot_tgt_cnt=0;
 
 function set_adb_tgts() {
 	adb_tgts[$adb_tgt_cnt]=$1
@@ -120,77 +121,66 @@ function do_fastboot_tgts()
 	echo "all of fastboot targets done!"
 }
 
-
-
-opt_set_cnt=0
-opt_set_index=0
-
 flashfiles_path=null
 fastboot_image=null
 
+index=1
+opt_index=$OPTIND
+
 if [ $# == 0 ]; then
 	usage_help
+	exit
 else
 	while getopts 'Bchi:lp:rRw' opt
 	do
 		case $opt in
 		B)
 			set_adb_tgts 'reboot bootloader'
-			let opt_set_cnt+=1
 		;;
 		c)
 			set_adb_tgts 'reboot recovery'
-			let opt_set_cnt+=1
 		;;
 		h)
 			print_opt_set_enum
-			let opt_set_cnt+=1
 		;;
 		i)
 			set_fastboot_tgts $OPTARG
-			let opt_set_cnt+=2
 		;;
 		l)
 			opt_fastboot_lock='unlock'
-			let opt_set_cnt+=1
 		;;
 		p)
 			flashfiles_path=$OPTARG
-			let opt_set_cnt+=2
 		;;
 		r)
 			set_adb_tgts 'reboot'
-			let opt_set_cnt+=1
 		;;
 		R)
 			set_fastboot_tgts 'reboot'
-			let opt_set_cnt+=1
 		;;
 		w)
 			set_adb_tgts 'wait'
-			let opt_set_cnt+=1
 		;;
 		esac
 	done
 
-
 	for var in $@
-		do
-			if [ $opt_set_index -lt $opt_set_cnt ]; then
-				let opt_set_index+=1
-			else
-				case $var in
-				help)
-					usage_help
-					exit
-				;;
-				*)
-					echo "Found unknown cmd: $var"
-					exit
-				;;
-				esac
-			fi
-		done
+	do
+		if [ $index -lt $opt_index ]; then #it is opt args, do nothing.
+			let index++
+		else
+			case $var in
+			help)
+				usage_help
+				exit
+			;;
+			*)
+				echo "Found unknown cmd: $var"
+				exit
+			;;
+			esac
+		fi
+	done
 fi
 
 if [ ${adb_tgt_cnt} != 0 ]; then

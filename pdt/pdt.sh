@@ -27,6 +27,47 @@ IOC="$FLASHFILES/ioc_firmware_gp_mrb_fab_e_slcan.ias_ioc"
 
 CPU=$(cat /proc/cpuinfo| grep "processor"| wc -l)
 
+
+
+opt_set_menu=(
+	'  -C:'
+	'    set number of CPU for build'
+	'  -f:'
+	'    set FW=$FLASHFILES/$OPTARG'
+	'  -F:'
+	'    set FW=$OPTARG'
+	'  -i:'
+	'    set IOC=$FLASHFILES/$OPTARG'
+	'  -I:'
+	'    set IOC=$OPTARG'
+	'  -g:'
+	'    set build_log=$OPTARG'
+	'  -L:'
+	'    set LUNCH_PDT=$OPTARG'
+	'  -m:'
+	'    set path for mmm build'
+	'  -o:'
+	'    set OPT=$OPTARG'
+	'  -p:'
+	'    set PDT=$OPTARG'
+	'  -S:'
+	'    set FLASHFILES=$OPTARG'
+	'  -m:'
+	'    set build_mmm_dir=$OPTARG'
+	'  -u:'
+	'    set SSH_URL=$OPTARG'
+	'  -U:'
+	'    set USER=$OPTARG'
+)
+
+function print_opt_set_enum() {
+	IFS=''
+	for set in ${opt_set_menu[@]}
+	do
+		echo ${set}
+	done
+}
+
 help_menu=(
 	"====================================="
 	"    pdt common command set"
@@ -69,52 +110,12 @@ help_menu=(
 	"    update vendorimage"
 )
 
-opt_set_menu=(
-	'  -C:'
-	'    set number of CPU for build'
-	'  -f:'
-	'    set FW=$FLASHFILES/$OPTARG'
-	'  -F:'
-	'    set FW=$OPTARG'
-	'  -i:'
-	'    set IOC=$FLASHFILES/$OPTARG'
-	'  -I:'
-	'    set IOC=$OPTARG'
-	'  -g:'
-	'    set build_log=$OPTARG'
-	'  -L:'
-	'    set LUNCH_PDT=$OPTARG'
-	'  -m:'
-	'    set path for mmm build'
-	'  -o:'
-	'    set OPT=$OPTARG'
-	'  -p:'
-	'    set PDT=$OPTARG'
-	'  -S:'
-	'    set FLASHFILES=$OPTARG'
-	'  -m:'
-	'    set build_mmm_dir=$OPTARG'
-	'  -u:'
-	'    set SSH_URL=$OPTARG'
-	'  -U:'
-	'    set USER=$OPTARG'
-)
-
-function print_opt_set_enum() {
-	IFS=''
-	for set in ${opt_set_menu[@]}
-	do
-		echo ${set}
-	done
-}
-
 function usage_help() {
 	IFS=''
 	for help in ${help_menu[@]}
 	do
 		echo ${help}
 	done
-	print_opt_set_enum
 }
 
 function show_config_info() {
@@ -339,8 +340,8 @@ function do_update_tgts()
 #     Check all of args.
 #     do nothing if found invalid args.
 #=======================================
-opt_set_cnt=0
-opt_set_index=0
+index=1
+opt_index=$OPTIND
 
 if [ $# == 0 ]; then
 	usage_help
@@ -352,71 +353,56 @@ else
 		case $opt in
 			C)
 				CPU=$OPTARG
-				let opt_set_cnt+=2
 			;;
 			f)
 				FW=$FLASHFILES/$OPTARG
-				let opt_set_cnt+=2			
 			;;
 			F)
 				FW=$OPTARG
-				let opt_set_cnt+=2			
 			;;
 			h)
 				print_opt_set_enum
-				let opt_set_cnt+=1
 			;;
 			i)
 				IOC=$FLASHFILES/$OPTARG
-				let opt_set_cnt+=2			
 			;;
 			I)
 				IOC=$OPTARG
-				let opt_set_cnt+=2			
 			;;
 			g)
 				build_log=$OPTARG
-				let opt_set_cnt+=2			
 			;;
 			L)
 				LUNCH_PDT=$OPTARG
-				let opt_set_cnt+=2			
 			;;
 			m)
 				build_mmm_dir=$OPTARG
-				let opt_set_cnt+=2			
 			;;
 			o)
 				OPT=$OPTARG
-				let opt_set_cnt+=2			
 			;;
 			O)
 				PRODUCT_OUT=$OPTARG
-				let opt_set_cnt+=2			
 			;;
 			p)
 				PDT=$OPTARG
-				let opt_set_cnt+=2			
 			;;
 			S)
 				FLASHFILES=$OPTARG
-				let opt_set_cnt+=2			
 			;;
 			u)
 				SSH_URL=$OPTARG
-				let opt_set_cnt+=2			
 			;;
 			U)
 				USER=$OPTARG
-				let opt_set_cnt+=2			
 			;;
 		esac
 	done
 
 	for var in $@
 	do
-		if [ $opt_set_index -lt $opt_set_cnt ]; then
-			let opt_set_index+=1
+		if [ $index -lt $opt_index ]; then #it is opt args, do nothing.
+			let index++
 		else
 			case $var in
 			'ba' | 'flash' | 'flashfiles')

@@ -36,6 +36,7 @@ function set_undo_cmd_list() {
 
 if [ $# == 0 ]; then
 	usage_help
+	exit
 else
 	set_undo_cmd_list -p $PDT
 	for var in $@
@@ -43,6 +44,7 @@ else
 		case $var in
 		'help')
 			usage_help
+			exit
 		;;
 		*)
 			set_undo_cmd_list $var

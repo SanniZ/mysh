@@ -82,22 +82,21 @@ function do_flash_tgts() {
 	echo 'all of flash are done!!!'
 }
 
-opt_set_cnt=0
-opt_set_index=0
+index=1
+opt_index=$OPTIND
 
 if [ $# == 0 ]; then
 	usage_help
+	exit
 else
 	while getopts 'f:i:h' opt
 	do
 		case $opt in
 		f)
 			FW=$OPTARG
-			let opt_set_cnt+=2
 		;;
 		i)
 			IOC=$OPTARG
-			let opt_set_cnt+=2
 		;;
 		h)
 			print_opt_set_enum
@@ -108,8 +107,8 @@ else
 
 	for var in $@
 	do
-		if [ ${opt_set_index} -lt ${opt_set_cnt} ]; then
-			let opt_set_index+=1
+		if [ $index -lt $opt_index ]; then #it is opt args, do nothing.
+			let index++
 		else
 			case $var in
 			'cfg')
@@ -120,6 +119,7 @@ else
 			;;
 			'help')
 				usage_help
+				exit
 			;;
 			'ioc')
 				set_flash_tgts 'ioc'

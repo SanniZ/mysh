@@ -19,22 +19,6 @@ IOC="pub/ioc_firmware_gp_mrb_fab_e.ias_ioc"
 # CPU=$(cat /proc/cpuinfo| grep "processor"| wc -l)
 
 
-
-help_menu=(
-	"====================================="
-	"    CWP platform command set"
-	"====================================="
-	'[options]'
-	'  env'
-	'    setup make env.'
-	'  ba'
-	'    build all images.'
-	'  fa'
-	'    flash all images.'
-	'  fd'
-	'    flash data images.'
-)
-
 opt_set_menu=(
 	'  -b:'
 	'    set build command'
@@ -51,6 +35,20 @@ function print_opt_set_enum() {
 }
 
 
+help_menu=(
+	"====================================="
+	"    CWP platform command set"
+	"====================================="
+	'  env'
+	'    setup make env.'
+	'  ba'
+	'    build all images.'
+	'  fa'
+	'    flash all images.'
+	'  fd'
+	'    flash data images.'
+)
+
 function usage_help() {
 	for help in ${help_menu[@]}
 	do
@@ -58,6 +56,7 @@ function usage_help() {
 	done
 	print_opt_set_enum
 	pdt.sh help
+	pdt.sh -h
 }
 
 
@@ -105,11 +104,12 @@ function set_undo_cmd_list() {
 opt_build_cmd=null
 opt_build_log=null
 
-opt_set_cnt=0
-opt_set_index=0
+index=1
+opt_index=$OPTIND
 
 if [ $# == 0 ]; then
 	usage_help
+	exit
 else
 	# set cwp info
 	set_undo_cmd_list -u $SSH_URL
@@ -128,23 +128,21 @@ else
 		case $opt in
 		b)
 			set_make_tgt $OPTARG
-			let opt_set_cnt+=2
 		;;
 		g)
 			opt_build_log=$OPTARG
-			let opt_set_cnt+=2
 		;;
 		h)
 			print_opt_set_enum
-			let opt_set_cnt+=1
+			exit
 		;;
 		esac
 	done
 
 	for var in $@
 	do
-		if [ $opt_set_index -lt $opt_set_cnt ]; then
-			let opt_set_index+=1
+		if [ $index -lt $opt_index ]; then #it is opt args, do nothing.
+			let index++
 		else
 			case $var in
 			'env')
@@ -176,6 +174,7 @@ else
 			;;
 			'help')
 				usage_help
+				exit
 			;;
 			*)
 				set_undo_cmd_list $var
@@ -185,8 +184,9 @@ else
 	done
 fi
 
+
 # call gordonpeak-common
-if [ ${undo_cmd_list} != null ]; then
+if [ ${undo_cmd_cnt} != 0 ]; then
 	pdt.sh ${undo_cmd_list[@]}
 fi
 

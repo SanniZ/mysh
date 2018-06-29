@@ -33,12 +33,14 @@ function set_undo_cmd_list() {
 # main
 if [ $# == 0 ]; then
 	usage_help
+	exit
 else
 	for var in $@
 	do
 		case $var in
 		'help')
 			usage_help
+			exit
 		;;
 		*)
 			set_undo_cmd_list $var
