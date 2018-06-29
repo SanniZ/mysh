@@ -13,26 +13,30 @@ log_type=null
 log_txt=null
 log_file=null
 
-help_menu=()
+help_menu=(
+	'===================================='
+	'    log command set'
+	'===================================='
+)
 
 opt_set_menu=(
-	'-c:'
-	'	get logcat log'
-	'-d:'
-	'	get dmesg log'
-	'-g:'
-	'	save log'
-	'-d:'
-	'	get kmsg log'
-	'-t:'
-	'	set grep string'
+	'  -c:'
+	'    get logcat log'
+	'  -d:'
+	'    get dmesg log'
+	'  -g:'
+	'    save log'
+	'  -d:'
+	'    get kmsg log'
+	'  -t:'
+	'    set grep string'
 )
 
 function print_opt_set_enum() {
 	IFS=''
-	for help in ${opt_set_menu[@]}
+	for set in ${opt_set_menu[@]}
 	do
-		echo ${help}
+		echo ${set}
 	done
 }
 

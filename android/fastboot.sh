@@ -17,13 +17,45 @@ adb_tgt_cnt=0;
 fastboot_tgts=();
 fastboot_tgt_cnt=0;
 
-help_menu=()
+help_menu=(
+	'===================================='
+	'    fastboot command set'
+	'===================================='
+)
+
+opt_set_menu=(
+	'  -B:'
+	'    set adb reboot bootloader'
+	'  -c:'
+	'    set adb reboot recovery'
+	'  -i:'
+	'    set fastboot image'
+	'  -l:'
+	'    set lock and unlock device'
+	'  -p:'
+	'    set flashfiles path'
+	'  -r:'
+	'    set reboot'
+	'  -R:'
+	'    set fastboot reboot'
+	'  -w:'
+	'    set waitting for device'
+)
+
+function print_opt_set_enum() {
+	IFS=''
+	for set in ${opt_set_menu[@]}
+	do
+		echo ${set}
+	done
+}
 
 function usage_help() {
 	for help in ${help_menu[@]}
 	do
 		echo ${help}
 	done
+	print_opt_set_enum
 }
 
 
@@ -88,32 +120,7 @@ function do_fastboot_tgts()
 	echo "all of fastboot targets done!"
 }
 
-opt_set_menu=(
-	'-B:'
-	'	set adb reboot bootloader'
-	'-c:'
-	'	set adb reboot recovery'
-	'-i:'
-	'	set fastboot image'
-	'-l:'
-	'	set lock and unlock device'
-	'-p:'
-	'	set flashfiles path'
-	'-r:'
-	'	set reboot'
-	'-R:'
-	'	set fastboot reboot'
-	'-w:'
-	'	set waitting for device'
-)
 
-function print_opt_set_enum() {
-	IFS=''
-	for help in ${opt_set_menu[@]}
-	do
-		echo ${help}
-	done
-}
 
 opt_set_cnt=0
 opt_set_index=0

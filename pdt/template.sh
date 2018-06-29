@@ -16,10 +16,30 @@ help_menu=(
 	"====================================="
 	"    xxx command set"
 	"====================================="
-	"[options]:[rm [file or folder]]"
 	"  xxx | xxxx"
 	"    xxxxxxxxx."
-	)
+)
+
+opt_set_menu=(
+	'  -x:'
+	'    xxx.'
+)
+
+function print_opt_set_enum() {
+	IFS=''
+	for set in ${opt_set_menu[@]}
+	do
+		echo ${set}
+	done
+}
+
+function usage_help() {
+	for help in ${help_menu[@]}
+	do
+		echo ${help}
+	done
+	print_opt_set_enum
+}
 
 function usage_help() {
 	for help in ${help_menu[@]}
@@ -53,19 +73,40 @@ function do_xxx_tgts() {
 	done
 }
 
+opt_set_cnt=0
+opt_set_index=0
+
 if [ $# == 0 ]; then
 	usage_help
 else
-	for var in $@
+	while getopts 'xx:' opt
 	do
-		case $var in
-		'xxx' | 'xxxx')
-			set_xxx_tgts 'xxx'
+		case $opt in
+		h)
+			print_opt_set_enum
+			exit
 		;;
-		*)
-			set_undo_cmd_tgts $var
+		x)
+			xxx $OPTARG
+			let opt_set_index+=2
 		;;
 		esac
+	done
+
+	for var in $@
+	do
+		if [ ${opt_set_index} -lt ${opt_set_cnt} ]; then
+			let opt_set_index+=1
+		else
+			case $var in
+			'xxx' | 'xxxx')
+				set_xxx_tgts 'xxx'
+			;;
+			*)
+				set_undo_cmd_tgts $var
+			;;
+			esac
+		fi
 	done
 	
 	if [ $xxx_list_cnt != 0 ]; then

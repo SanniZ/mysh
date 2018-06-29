@@ -19,15 +19,26 @@ help_menu=(
 	"====================================="
 	"    Intel platform command set"
 	"====================================="
-	'  ffw'
-	'    flash firmware'
-	'  fioc'
-	'    flash ioc'
 	'  fw'
-	'    config firmware.'
+	'    flash firmware'
 	'  ioc'
-	'    config ioc'
-	)
+	'    flash ioc'
+)
+
+opt_set_menu=(
+	'  -f:'
+	'	set ifwi file'
+	'  -i:'
+	'	set ioc file'
+)
+
+function print_opt_set_enum() {
+	IFS=''
+	for set in ${opt_set_menu[@]}
+	do
+		echo ${set}
+	done
+}
 
 function usage_help() {
 	IFS=''
@@ -35,9 +46,9 @@ function usage_help() {
 	do
 		echo ${help}
 	done
+	print_opt_set_enum
 }
 
-update_config_set=null
 
 function show_config_info() {
 	echo '=================================='
@@ -47,17 +58,7 @@ function show_config_info() {
 	echo 'IOC         :' $IOC
 }
 
-update_config_set=null
 
-function update_config_set() {
-	if [ $update_config_set == 'fw' ]; then
-		FW=$1
-	elif [ $update_config_set == 'ioc' ]; then
-		IOC=$1
-	fi
-
-	update_config_set=null
-}
 
 flash_tgts=()
 flash_tgt_cnt=0
@@ -70,7 +71,7 @@ function set_flash_tgts() {
 function do_flash_tgts() {
 	for tgt in ${flash_tgts[@]}
 	do
-		echo 'start to flash' $tgt
+		echo "start to flash $tgt"
 		if [ $tgt == 'fw' ]; then
 			sudo /opt/intel/platformflashtool/bin/ias-spi-programmer --write $FW
 		elif [ $tgt == 'ioc' ]; then
@@ -81,38 +82,54 @@ function do_flash_tgts() {
 	echo 'all of flash are done!!!'
 }
 
-
+opt_set_cnt=0
+opt_set_index=0
 
 if [ $# == 0 ]; then
 	usage_help
 else
+	while getopts 'f:i:h' opt
+	do
+		case $opt in
+		f)
+			FW=$OPTARG
+			let opt_set_cnt+=2
+		;;
+		i)
+			IOC=$OPTARG
+			let opt_set_cnt+=2
+		;;
+		h)
+			print_opt_set_enum
+			exit
+		;;
+		esac
+	done
+
 	for var in $@
-		do
+	do
+		if [ ${opt_set_index} -lt ${opt_set_cnt} ]; then
+			let opt_set_index+=1
+		else
 			case $var in
 			'cfg')
 				show_config_info
 			;;
-			'ffw')
+			'fw')
 				set_flash_tgts 'fw'
 			;;
-			'fioc')
-				set_flash_tgts 'ioc'
-			;;
-			'fw')
-				update_config_set='fw'
+			'help')
+				usage_help
 			;;
 			'ioc')
-				update_config_set='ioc'
+				set_flash_tgts 'ioc'
 			;;
 			*)
-				if [ $update_config_set != null ]; then
-					update_config_set $var
-				else
-					echo "Found unknow cmd($var) and return..."
-					exit
-				fi
+				echo "Found unknow cmd: $var"
+				exit
 			esac
-		done
+		fi
+	done
 fi
 
 # set IFS

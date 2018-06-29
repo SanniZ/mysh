@@ -14,18 +14,22 @@ LOCAL_PATH=$(pwd)
 
 
 
-help_menu=()
+help_menu=(
+	'===================================='
+	'    linux command set'
+	'===================================='
+)
 
 opt_set_menu=(
-	'-r:'
-	'	rm files.'
+	'  -r:'
+	'    rm files.'
 )
 
 function print_opt_set_enum() {
 	IFS=''
-	for help in ${opt_set_menu[@]}
+	for set in ${opt_set_menu[@]}
 	do
-		echo ${help}
+		echo ${set}
 	done
 }
 

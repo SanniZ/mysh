@@ -31,7 +31,6 @@ help_menu=(
 	"====================================="
 	"    pdt common command set"
 	"====================================="
-	"[options]"
 	"  ba | flash | flashfiles:"
 	"    make flashfiles"
 	"  bb | boot | bootimage:"
@@ -66,7 +65,46 @@ help_menu=(
 	"    update tosimage"
 	"  uv | update_vendor:"
 	"    update vendorimage"
-	)
+)
+
+opt_set_menu=(
+	'  -C:'
+	'    set number of CPU for build'
+	'  -f:'
+	'    set FW=$FLASHFILES/$OPTARG'
+	'  -F:'
+	'    set FW=$OPTARG'
+	'  -i:'
+	'    set IOC=$FLASHFILES/$OPTARG'
+	'  -I:'
+	'    set IOC=$OPTARG'
+	'  -g:'
+	'    set build_log=$OPTARG'
+	'  -L:'
+	'    set LUNCH_PDT=$OPTARG'
+	'  -m:'
+	'    set path for mmm build'
+	'  -o:'
+	'    set OPT=$OPTARG'
+	'  -p:'
+	'    set PDT=$OPTARG'
+	'  -S:'
+	'    set FLASHFILES=$OPTARG'
+	'  -m:'
+	'    set build_mmm_dir=$OPTARG'
+	'  -u:'
+	'    set SSH_URL=$OPTARG'
+	'  -U:'
+	'    set USER=$OPTARG'
+)
+
+function print_opt_set_enum() {
+	IFS=''
+	for set in ${opt_set_menu[@]}
+	do
+		echo ${set}
+	done
+}
 
 function usage_help() {
 	IFS=''
@@ -74,6 +112,7 @@ function usage_help() {
 	do
 		echo ${help}
 	done
+	print_opt_set_enum
 }
 
 function show_config_info() {
@@ -285,44 +324,7 @@ function do_update_tgts()
 }
 
 
-opt_set_menu=(
-	'-C:'
-	'	set number of CPU for build'
-	'-f:'
-	'	set FW=$FLASHFILES/$OPTARG'
-	'-F:'
-	'	set FW=$OPTARG'
-	'-i:'
-	'	set IOC=$FLASHFILES/$OPTARG'
-	'-I:'
-	'	set IOC=$OPTARG'
-	'-g:'
-	'	set build_log=$OPTARG'
-	'-L:'
-	'	set LUNCH_PDT=$OPTARG'
-	'-m:'
-	'	set path for mmm build'
-	'-o:'
-	'	set OPT=$OPTARG'
-	'-p:'
-	'	set PDT=$OPTARG'
-	'-S:'
-	'	set FLASHFILES=$OPTARG'
-	'-m:'
-	'	set build_mmm_dir=$OPTARG'
-	'-u:'
-	'	set SSH_URL=$OPTARG'
-	'-U:'
-	'	set USER=$OPTARG'
-)
 
-function print_opt_set_enum() {
-	IFS=''
-	for help in ${opt_set_menu[@]}
-	do
-		echo ${help}
-	done
-}
 #=======================================
 # main entry
 #     Check all of args.
