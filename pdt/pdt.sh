@@ -206,25 +206,30 @@ function set_build_tgt() {
 
 function do_build_tgts()
 {
-	setup_env
-	rm -rf out/.lock
 	for tgt in ${build_tgts[@]}
 	do
-		if [ $tgt == 'mmm' ]; then
-			echo 'mmm ' $build_mmm_dir "-j$CPU"
-			if [ $build_log  != null ]; then
-				mmm $build_mmm_dir -j$CPU 2>&1 | tee $build_log
-			else
-				mmm $build_mmm_dir -j$CPU
-			fi
-		elif [ $tgt == 'clean' ]; then
+		if [ $tgt == 'clean' ]; then
+			echo 'do make clean...'
 			make clean
 		else
-			echo 'make' $tgt "-j$CPU"
-			if [ $build_log  != null ]; then
-				make $tgt -j$CPU 2>&1 | tee $build_log
+			# setup env for build.
+			setup_env
+			rm -rf out/.lock
+
+			if [ $tgt == 'mmm' ]; then
+				echo 'mmm ' $build_mmm_dir "-j$CPU"
+				if [ $build_log  != null ]; then
+					mmm $build_mmm_dir -j$CPU 2>&1 | tee $build_log
+				else
+					mmm $build_mmm_dir -j$CPU
+				fi
 			else
-				make $tgt -j$CPU
+				echo 'make' $tgt "-j$CPU"
+				if [ $build_log  != null ]; then
+					make $tgt -j$CPU 2>&1 | tee $build_log
+				else
+					make $tgt -j$CPU
+				fi
 			fi
 		fi
 	done
@@ -475,7 +480,7 @@ else
 				set_update_tgt 'vendor'
 			;;
 			*)
-				echo "Found unknown cmd($var) and return..."
+				echo "Found unknown cmd: $var"
 				exit
 			;;
 			esac
