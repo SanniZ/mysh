@@ -41,6 +41,8 @@ help_menu=(
 	"    make tosimage"
 	"  bv | vendor | vendorimage:"
 	"    make vendorimage"
+	"  clr | clean"
+	"    make clean"
 	"  fw:"
 	"    update firmware"
 	"  ioc:"
@@ -215,6 +217,8 @@ function do_build_tgts()
 			else
 				mmm $build_mmm_dir -j$CPU
 			fi
+		elif [ $tgt == 'clean' ]; then
+			make clean
 		else
 			echo 'make' $tgt "-j$CPU"
 			if [ $build_log  != null ]; then
@@ -427,6 +431,9 @@ else
 			;;
 			'cfg')
 				set_help_tgt 'cfg'
+			;;
+			'clr' | 'clean')
+				set_build_tgt 'clean'
 			;;
 			'fw')
 				set_bios_tgt 'fw'
