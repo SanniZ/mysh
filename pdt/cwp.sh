@@ -18,10 +18,7 @@ IOC="pub/ioc_firmware_gp_mrb_fab_e.ias_ioc"
 
 # CPU=$(cat /proc/cpuinfo| grep "processor"| wc -l)
 
-opt_build_log=null
 
-opt_set_cnt=0
-opt_set_index=0
 
 help_menu=(
 	"====================================="
@@ -36,29 +33,61 @@ help_menu=(
 	'    flash all images.'
 	'  fd'
 	'    flash data images.'
-	)
+)
+
+opt_set_menu=(
+	'  -b:'
+	'    set build command'
+	'  -g:'
+	'    set build_log=$OPTARG'
+)
+
+function print_opt_set_enum() {
+	IFS=''
+	for set in ${opt_set_menu[@]}
+	do
+		echo ${set}
+	done
+}
+
 
 function usage_help() {
 	for help in ${help_menu[@]}
 	do
 		echo ${help}
 	done
+	print_opt_set_enum
 	pdt.sh help
 }
 
 
-function make_opts() {
+make_tgts=()
+make_tgt_cnt=0
+
+function set_make_tgt() {
+	for tgt in $@
+	do
+		make_tgts[$make_tgt_cnt]=$tgt
+		let make_tgt_cnt+=1
+	done
+}
+
+function do_make_tgts() {
 	# clear screen
 	reset
 
-	if [ $opt_build_log != null ]; then
-		if [ -e $opt_build_log ]; then
-			mv $opt_build_log ${opt_build_log}.old
-		fi
-		make $1 2>&1 | tee $opt_build_log
-	else
-		make $1
+	if [ -e ${opt_build_log} ]; then
+		mv ${opt_build_log} ${opt_build_log}.old
 	fi
+
+	for tgt in ${make_tgts[@]}
+	do
+		if [ ${opt_build_log} != null ]; then
+			make $1 2>&1 | tee ${opt_build_log}
+		else
+			make $1
+		fi
+	done
 }
 
 undo_cmd_list=null
@@ -72,24 +101,12 @@ function set_undo_cmd_list() {
 	done
 }
 
-opt_set_menu=(
-	'-b:'
-	'	set build command'
-	'-g:'
-	'	set build_log=$OPTARG'
-)
-
-function print_opt_set_enum() {
-	IFS=''
-	for help in ${opt_set_menu[@]}
-	do
-		echo ${help}
-	done
-}
-
 
 opt_build_cmd=null
+opt_build_log=null
 
+opt_set_cnt=0
+opt_set_index=0
 
 if [ $# == 0 ]; then
 	usage_help
@@ -110,7 +127,7 @@ else
 	do
 		case $opt in
 		b)
-			opt_build_cmd=$OPTARG
+			set_make_tgt $OPTARG
 			let opt_set_cnt+=2
 		;;
 		g)
@@ -131,34 +148,34 @@ else
 		else
 			case $var in
 			'env')
-				make_opts 'env'
+				set_make_tgt 'env'
 			;;
 			'ba')
-				make_opts 'all'
+				set_make_tgt 'all'
 			;;
 			'bd')
-				make_opts 'sos_dm'
+				set_make_tgt 'sos_dm'
+			;;
+			'make')
+				set_make_tgt 'make'
 			;;
 			'bs')
-				make_opts 'sos'
+				set_make_tgt 'sos'
 			;;
 			'bu')
-				make_opts 'uos'
+				set_make_tgt 'uos'
 			;;
 			'fa')
-				make_opts 'flash_all'
+				set_make_tgt 'flash_all'
 			;;
 			'fd')
-				make_opts 'flash_data'
+				set_make_tgt 'flash_data'
 			;;
 			'fs')
-				make_opts 'flash_sos'
+				set_make_tgt 'flash_sos'
 			;;
 			'help')
 				usage_help
-			;;
-			'make')
-				make_opts $opt_build_cmd
 			;;
 			*)
 				set_undo_cmd_list $var
@@ -166,9 +183,13 @@ else
 			esac
 		fi
 	done
+fi
 
-	# call gordonpeak-common
-	if [ ${undo_cmd_list} != null ]; then
-		pdt.sh ${undo_cmd_list[@]}
-	fi
+# call gordonpeak-common
+if [ ${undo_cmd_list} != null ]; then
+	pdt.sh ${undo_cmd_list[@]}
+fi
+
+if [ ${make_tgt_cnt} != 0 ]; then
+	do_make_tgts
 fi

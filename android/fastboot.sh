@@ -109,7 +109,7 @@ function do_fastboot_tgts()
 			fastboot reboot
 		else
 			tgt_img=${tgt}.img
-			echo 'fastboot' ${tgt} ${flashfiles_path}/${tgt_img}
+			echo "fastboot ${tgt} ${flashfiles_path}/${tgt_img}"
 			fastboot flash ${tgt} ${flashfiles_path}/${tgt_img}
 		fi
 	done
@@ -185,7 +185,7 @@ else
 					exit
 				;;
 				*)
-					echo 'Found unknown cmd: ' $var
+					echo "Found unknown cmd: $var"
 					exit
 				;;
 				esac

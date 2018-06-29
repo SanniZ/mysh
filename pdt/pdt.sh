@@ -19,8 +19,8 @@ LUNCH_PDT="$PDT-$OPT"
 
 USER="yingbin"
 
-PRODUCT_OUT=out/target/product/$PDT
-FLASHFILES=$PRODUCT_OUT/$PDT-flashfiles-eng.$USER
+PRODUCT_OUT="out/target/product/$PDT"
+FLASHFILES="$PRODUCT_OUT/$PDT-flashfiles-eng.$USER"
 
 FW="$FLASHFILES/ifwi_gr_mrb_b1.bin"
 IOC="$FLASHFILES/ioc_firmware_gp_mrb_fab_e_slcan.ias_ioc"
@@ -118,18 +118,18 @@ function usage_help() {
 }
 
 function show_config_info() {
-	echo '=================================='
-	echo '  All of config info'
-	echo '=================================='
-	echo 'SSH URL     :' $SSH_URL
-	echo 'PDT         :' $PDT
-	echo 'OPT         :' $OPT
-	echo 'LUNCH_PDT   :' $LUNCH_PDT
-	echo 'USER        :' $USER
-	echo 'PRODUCT_OUT :' $PRODUCT_OUT
-	echo 'FLASHFILES  :' $FLASHFILES
-	echo 'FW          :' $FW
-	echo 'IOC         :' $IOC
+	echo "=================================="
+	echo "  All of config info"
+	echo "=================================="
+	echo "SSH URL     : $SSH_URL"
+	echo "PDT         : $PDT"
+	echo "OPT         : $OPT"
+	echo "LUNCH_PDT   : $LUNCH_PDT"
+	echo "USER        : $USER"
+	echo "PRODUCT_OUT : $PRODUCT_OUT"
+	echo "FLASHFILES  : $FLASHFILES"
+	echo "FW          : $FW"
+	echo "IOC         : $IOC"
 }
 
 help_tgts=()
@@ -217,14 +217,14 @@ function do_build_tgts()
 			rm -rf out/.lock
 
 			if [ $tgt == 'mmm' ]; then
-				echo 'mmm ' $build_mmm_dir "-j$CPU"
+				echo "mmm $build_mmm_dir -j$CPU"
 				if [ $build_log  != null ]; then
 					mmm $build_mmm_dir -j$CPU 2>&1 | tee $build_log
 				else
 					mmm $build_mmm_dir -j$CPU
 				fi
 			else
-				echo 'make' $tgt "-j$CPU"
+				echo "make $tgt -j$CPU"
 				if [ $build_log  != null ]; then
 					make $tgt -j$CPU 2>&1 | tee $build_log
 				else
@@ -273,7 +273,7 @@ function set_remove_tgt() {
 function do_remove_tgts() {
 	for tgt in ${remove_tgts[@]}
 	do
-		echo 'rm' $tgt
+		echo "rm -rf $tgt"
 		rm -rf $tgt
 	done
 }

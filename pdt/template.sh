@@ -108,13 +108,13 @@ else
 			esac
 		fi
 	done
-	
-	if [ $xxx_list_cnt != 0 ]; then
-		do_xxx_tgts
-	fi
-	
-	# call gordonpeak-common
-	if [ ${undo_cmd_list} != null ]; then
-		pdt.sh ${undo_cmd_list[@]}
-	fi
+fi
+
+# call gordonpeak-common
+if [ ${undo_cmd_list} != null ]; then
+	pdt.sh ${undo_cmd_list[@]}
+fi
+
+if [ $xxx_list_cnt != 0 ]; then
+	do_xxx_tgts
 fi

@@ -52,6 +52,7 @@ function set_remove_opt() {
 function do_remove_tgts() {
 	for ((i = 0; i < ${opt_rm_tgt_cnt}; i++))
 	do
+		echo "rm -rf ${opt_rm_tgts[$i]}"
 		rm -rf ${opt_rm_tgts[$i]}
 	done
 }

@@ -45,9 +45,9 @@ else
 		;;
 		esac
 	done
+fi
 
-	# call gordonpeak-common
-	if [ ${undo_cmd_list} != null ]; then
-		pdt.sh ${undo_cmd_list[@]}
-	fi
+# call gordonpeak-common
+if [ ${undo_cmd_list} != null ]; then
+	pdt.sh ${undo_cmd_list[@]}
 fi
