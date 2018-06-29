@@ -19,14 +19,14 @@ help_menu=(
 	"    fpc extra command set"
 	"====================================="
 	"[options]:",
-	"	bft | build_fpc_test:"
-	"		build fpc_tee_test"
-	"	fts | fpc_test_s:"
-	"		run fpc_tee_test -s"
-	"	fte | fpc_test_e:"
-	"		run fpc_tee_test -e"
-	"	pft | push_fpc_test:"
-	"		push fpc_tee_test to /data"
+	"  bt | build_test:"
+	"    build fpc_tee_test"
+	"  ts | test_s:"
+	"    run fpc_tee_test -s"
+	"  te | test_e:"
+	"    run fpc_tee_test -e"
+	"  pt | push_test:"
+	"    push fpc_tee_test to /data"
 	)
 
 function usage_help() {
