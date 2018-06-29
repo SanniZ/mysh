@@ -130,6 +130,6 @@ if [ ${undo_cmd_list} != null ]; then
 	pdt.sh ${undo_cmd_list[@]}
 fi
 
-fi [ ${fpc_tgt_cnt} != 0 ]; then
+if [ ${fpc_tgt_cnt} != 0 ]; then
 	do_fpc_tgts
 fi
