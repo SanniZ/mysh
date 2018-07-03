@@ -105,7 +105,6 @@ opt_build_cmd=null
 opt_build_log=null
 
 index=1
-opt_index=$OPTIND
 
 if [ $# == 0 ]; then
 	usage_help
@@ -141,6 +140,7 @@ else
 
 	for var in $@
 	do
+		opt_index=$OPTIND
 		if [ $index -lt $opt_index ]; then #it is opt args, do nothing.
 			let index++
 		else
