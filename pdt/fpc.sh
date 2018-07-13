@@ -17,7 +17,7 @@ help_menu=(
 	"====================================="
 	"    fpc extra command set"
 	"====================================="
-	"  bt | build_test:"
+	"  bft | build_fpc_test:"
 	"    build fpc_tee_test"
 	"  ts | test_s:"
 	"    run fpc_tee_test -s"
@@ -102,8 +102,9 @@ else
 
 	for var in $@
 	do
+		echo $var
 		case $var in
-		'bt' | 'build_test')
+		'bft' | 'build_fpc_test')
 			set_undo_cmd_list -m 'vendor/intel/hardware/fingerprint/fingerprint_tac/normal' mmm
 		;;
 		'te' | 'test_e')
