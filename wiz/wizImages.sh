@@ -63,7 +63,7 @@ function unzip_ziw()
 						outp=$out_path/$type/$dir/$fname
 						mkdir -p $outp
 						# unzip .ziw
-						unzip -Cq -d $outp $f
+						unzip -Cqo -d $outp $f
 						# get png and jpg.
 						if [ -e $outp/index_files ]; then
 							find $outp/index_files -type f -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" | xargs -I {} mv -f {} $outp
