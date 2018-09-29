@@ -2,7 +2,6 @@
 
 #set -x
 
-
 function menu_help()
 {
 	echo "==========================================="
@@ -16,18 +15,16 @@ function menu_help()
 
 function rm_empty_dir()
 {
-	find $1 -type d -empty | xargs rm -rf
+	find $1 -type d -empty | xargs -I {} rm -rf {}
 }
 
-function rm_invalid_file()
+function rm_unuse_file()
 {
 	rm -rf $1/*.html
 	rm -rf $1/index_files
-        # delete sepical size files.
-	imgs=$(find $1 -size -32k -exec ls {} \;)
-	rm -rf $imgs
+	# delete size>32k files.
+	find $1 -type f -size -32k | xargs -I {} rm -rf {}
 }
-
 
 function unzip_ziw()
 {
@@ -45,8 +42,8 @@ function unzip_ziw()
 		type_path=$src_path/$type
 		if [ -d $type_path ]; then
 			cd $type_path
-			$(rename 's/ /_/g' *)
-                        dirs=$(ls)
+			rename 's/ /_/g' *
+			dirs=$(ls)
 
 			# for all of dirs
 			for dir in $dirs
@@ -55,10 +52,9 @@ function unzip_ziw()
 				if [ -d $dir_path ]; then
 					# for all of .ziw
 					cd $dir_path
-					$(rename 's/ /_/g' *)
-					$(rename 's/！/_/g' *)
+					rename 's/ /_/g' *
 					fs=$(find $dir_path -name "*.ziw")
-		                        for f in $fs
+					for f in $fs
 					do
 						# create output dir
 						fname=$(basename $f .ziw)
@@ -68,13 +64,12 @@ function unzip_ziw()
 						unzip -Cq -d $outp $f
 						# get png and jpg.
 						if [ -e $outp/index_files ]; then
-							fs=$(find $outp/index_files -type f -name "*.png" -o -name "*.jpg" -o -name "*.jpeg")
-							mv -f $fs $outp
+							find $outp/index_files -type f -name "*.png" -o -name "*.jpg" -o -name "*.jpeg" | xargs -I {} mv -f {} $outp
 						fi
 						# remove invalid files.
-				                rm_invalid_file $outp
-		                        done
-                                fi
+				        rm_unuse_file $outp
+					done
+				fi
 			done
 		fi
 	done
@@ -106,5 +101,5 @@ else
 	fi
 
 	unzip_ziw $src $out
-        rm_empty_dir $out
+	rm_empty_dir $out
 fi
