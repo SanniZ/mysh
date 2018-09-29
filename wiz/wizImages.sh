@@ -42,12 +42,14 @@ function unzip_ziw()
 		type_path=$src_path/$type
 		if [ -d $type_path ]; then
 			cd $type_path
-			rename 's/ /_/g' *
 			dirs=$(ls)
 
 			# for all of dirs
 			for dir in $dirs
 			do
+				# backup dir
+				cp -r $src_path/$type/$dir $src_path/$type/$dir.bak
+				
 				dir_path=$src_path/$type/$dir
 				if [ -d $dir_path ]; then
 					# for all of .ziw
@@ -70,6 +72,10 @@ function unzip_ziw()
 				        rm_unuse_file $outp
 					done
 				fi
+				
+				#restore dir
+				rm -rf $src_path/$type/$dir
+				mv $src_path/$type/$dir.bak $src_path/$type/$dir
 			done
 		fi
 	done
