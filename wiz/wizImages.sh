@@ -42,20 +42,22 @@ function unzip_ziw()
 	# for types
 	for type in $types
 	do
-		if [ -d $src_path/$type ]; then
-			cd $src_path/$type
+		type_path=$src_path/$type
+		if [ -d $type_path ]; then
+			cd $type_path
 			$(rename 's/ /_/g' *)
                         dirs=$(ls)
 
 			# for all of dirs
 			for dir in $dirs
 			do
-				if [ -d $src_path/$type/$dir ]; then
+				dir_path=$src_path/$type/$dir
+				if [ -d $dir_path ]; then
 					# for all of .ziw
-					cd $src_path/$type/$dir
+					cd $dir_path
 					$(rename 's/ /_/g' *)
 					$(rename 's/！/_/g' *)
-					fs=$(find $path -name "*.ziw")
+					fs=$(find $dir_path -name "*.ziw")
 		                        for f in $fs
 					do
 						# create output dir
