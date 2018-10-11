@@ -2,6 +2,9 @@
 
 function help_menu()
 {
+    echo '============================================'
+    echo '          IBus command set'
+    echo '============================================'
     echo '-r'
     echo '  restart'
     echo '-L'

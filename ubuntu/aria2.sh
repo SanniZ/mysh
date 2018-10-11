@@ -10,7 +10,7 @@ function config_aria2()
 
 	echo "#＝＝＝＝＝＝＝＝＝文件保存目录自行修改" >> $conf
 	# 根据实际情况修存储位置
-	echo "dir=/home/yingbin/Downloads" >> $conf
+	echo "dir=/home/yingbin/Downloads/Aria2" >> $conf
 	echo "disable-ipv6=true" >> $conf
 	echo "" >> $conf
 	echo "#打开rpc的目的是为了给web管理端用" >> $conf
