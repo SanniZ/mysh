@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# ------------------------------------------------
+#  Author: Byng Zeng
+#  Date:   2018-11-08
+# ------------------------------------------------
+
 path_of_patch=none
 path_of_code=none
 
@@ -36,8 +41,10 @@ function git_apply_patch()
 	do
 		p_patch=$path_of_patch/$dir
 		p_code=$path_of_code/$dir
+		echo "apply patch at: $p_code"
 		cd $p_code
 		git am $p_patch/*.patch
+		echo ''
 	done
 }
 
