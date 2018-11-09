@@ -23,10 +23,12 @@ function help_menu()
 	echo '  get all of prebuild files'
 	echo '-c xxx'
 	echo '  xxx: root path of source code'
-	echo '-p xxx'
+	echo '  if it is not set, default set to current path.'
+echo '-p xxx'
 	echo '  xxx: root path of patches'
 	echo '-f xxx'
 	echo '  xxx: root path of store prebuild files'
+	echo '  if it is not set, default set to current path.'
 }
 
 # dirs of fingerprint patch.
@@ -53,12 +55,17 @@ function git_apply_patch()
 		# path of patch and source code.
 		p_patch=$path_of_patch/$dir
 		p_code=$path_of_code/$dir
-		echo "apply patch at: $p_code"
-		# enter dir of source code
-		cd $p_code
-		# apply all of .patch under dir.
-		git am $p_patch/*.patch
-		echo ''
+		if [[ -d $p_code  && -d $p_patch ]]; then
+			echo "apply patch at: $p_code"
+			# enter dir of source code
+			cd $p_code
+			# apply all of .patch under dir.
+			git am $p_patch/*.patch
+			echo ''
+		else
+			echo "Error, invalid path(source:$p_code patch:$p_patch) please check it"
+			break
+		fi
 	done
 }
 
@@ -96,11 +103,16 @@ function get_prebuild_files()
 {
 	for f in ${files_of_prebuild[@]}
 	do
-		# get dir and create it.
-		dir=${f%/*}
-		mkdir -p $path_of_patch/$dir
-		# copy file to output file.
-		cp $path_of_prebuild/$f $path_of_patch/$dir
+		if [ -e $path_of_prebuild/$f ]; then
+			# get dir and create it.
+			dir=${f%/*}
+			mkdir -p $path_of_patch/$dir
+			# copy file to output file.
+			cp $path_of_prebuild/$f $path_of_patch/$dir
+		else
+			echo "Error, no found $path_of_prebuild/$f, please check it"
+			break
+		fi
 	done
 }
 
@@ -133,12 +145,26 @@ else
 	done
 fi
 
-# run apply patch
-if [[ $path_of_patch != none && $path_of_code != none && $opt_for_patch == 'apply' ]]; then
-	git_apply_patch
-fi
+if [ $opt_for_patch != none ]; then
+	# run apply patch
+	if [[ $path_of_patch != none && $opt_for_patch == 'apply' ]]; then
+		if [ $path_of_code == none ]; then
+			path_of_code=$(pwd)
+		fi
 
-# run get prebuild file.
-if [[ $path_of_patch != none && $path_of_prebuild != none && $opt_for_patch == 'get-prebuild' ]]; then
-	get_prebuild_files
+		git_apply_patch
+	fi
+
+	# run get prebuild file.
+	if [[ $path_of_patch != none && $opt_for_patch == 'get-prebuild' ]]; then
+		if [ $path_of_prebuild == none ]; then
+			path_of_prebuild=$(pwd)
+		fi
+
+		get_prebuild_files
+	fi
+else
+	echo 'Error, please input your option!'
+	echo ''
+	help_menu
 fi
