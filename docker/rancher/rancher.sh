@@ -5,14 +5,14 @@
 # Copyright (C) Byng.Zeng
 # ================================
 
-VERSION='1.1.0'
+VERSION='1.2.0'
 
 # get real location of rancher.sh
 PWD=$(cd `dirname $(readlink -f $0)`; pwd)
 
 
-# ssh connect to rancherOS
-function ssh_connect_rancher()
+# connect to rancherOS
+function connect_rancher()
 {
     if [ $rancherOS == false ]; then
         echo "Connect to $1..."
@@ -95,6 +95,12 @@ function check_rancherOS()
 }
 
 
+# create a pseudo-TTY to adb.
+function connect_adb()
+{
+    docker exec -it android$1 sh
+}
+
 # print usage help.
 function print_usage_help()
 {
@@ -107,6 +113,7 @@ function print_usage_help()
         echo "-s | start     [id] : start id image"
         echo "-t | stop      [id] : stop id image"
         echo "-l | list           : list of containers"
+        echo "-a | adb       id   : connect to adb"
     else  # non rancherOS.
         echo '-c | connect   [IP] : connect to rancherOS'
         echo '-C | CONNECT   [IP] : push rancher.sh and connect to rancherOS'
@@ -135,7 +142,7 @@ else
                 rancherIP=rancher@$1
             fi
             shift
-            ssh_connect_rancher ${rancher_host}
+            connect_rancher ${rancherIP}
         ;;
         -C | CONNECT)  # push rancher.sh and connect to rancherOS.
             shift
@@ -144,7 +151,7 @@ else
             fi
             shift
             push_rancher_sh ${rancherIP}
-            ssh_connect_rancher ${rancherIP}
+            connect_rancher ${rancherIP}
         ;;
         -s | start)  # start
             shift
@@ -165,6 +172,15 @@ else
         -l | list)  # list
             shift
             aic_list
+        ;;
+        -a | adb)
+            shift
+            index=0
+            if [ "$#" -gt 0 ]; then
+                index=$1
+            fi
+            echo "connect to android${index}"
+            connect_adb ${index}
         ;;
         esac
         shift
