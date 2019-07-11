@@ -5,7 +5,7 @@
 # Copyright (C) Byng.Zeng
 # ================================
 
-VERSION='1.2.1'
+VERSION='1.2.2'
 
 # get real location of rancher.sh
 PWD=$(cd `dirname $(readlink -f $0)`; pwd)
@@ -30,17 +30,28 @@ USAGE_RANCHEROS=$(cat <<- EOM
 EOM
 )
 
-USAGE_NON_RANCHER=$(cat <<- EOM
+USAGE_UBUNTU=$(cat <<- EOM
   -c | connect  [IP]  : connect to rancherOS.
   -C | CONNECT  [IP]  : push rancher.sh and connect to rancherOS.
 EOM
 )
 
+# check rancherOS.
+# return true if it is rancherOS, other is false.
+function check_rancherOS()
+{
+    if [ ! -z "$(uname -r | grep rancher)"  ]; then
+        echo true
+    else
+        echo false
+    fi
+}
+
 
 # connect to rancherOS
 function connect_rancher()
 {
-    if [ $rancherOS == false ]; then
+    if [ !$(check_rancherOS) ]; then
         echo "Connect to $1"
         ssh rancher@$1
     fi
@@ -50,7 +61,7 @@ function connect_rancher()
 # push rancher.sh to rancherOS.
 function push_rancher_sh()
 {
-    if [ $rancherOS == false ]; then
+    if [ !$(check_rancherOS) ]; then
         echo "Push rancher.sh to $1"
         scp $PWD/rancher.sh rancher@$1:/home/rancher
     fi
@@ -108,17 +119,6 @@ function aic_list()
 }
 
 
-# check rancherOS.
-function check_rancherOS()
-{
-    if [ ! -z "$(uname -r | grep rancher)"  ]; then
-        rancherOS=true
-    else
-        rancherOS=false
-    fi
-}
-
-
 # create a pseudo-TTY to adb.
 function connect_adb()
 {
@@ -131,20 +131,16 @@ function connect_adb()
 function print_usage_help()
 {
     echo "$USAGE_TIPS"
-    if [ $rancherOS == true ]; then
+    if [ $(check_rancherOS) ]; then
         echo "$USAGE_RANCHEROS"
     else
-        echo "$USAGE_NON_RANCHER"
+        echo "$USAGE_UBUNTU"
     fi
 }
 
 # rancher default IP address.
 rancherIP='10.239.92.135'
-# non-rancherOS.
-rancherOS=false
 
-# check rancherOS.
-check_rancherOS
 
 if [ $# == 0 ]; then  # No args, print usage help.
     print_usage_help
