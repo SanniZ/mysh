@@ -3,7 +3,7 @@
 # Auther   : Byng.Zeng
 # Copyright: Byng.Zeng
 #
-VERSION='1.0.0'
+VERSION='1.0.1'
 
 SYSTEMD_DOCKER_PROXY_DIR=/etc/systemd/system/docker.service.d
 TEMP_DIR=~/.docker.service.d.tmp #
@@ -42,6 +42,8 @@ function pre_config()
 # create new config files.
 function config_proxy()
 {
+    pre_config ${TEMP_DIR}
+
     echo "[Service]" >> ${TEMP_DIR}/http-proxy.conf
     echo "Environment=\"HTTP_PROXY=http://child-prc.intel.com:913/\"" >> ${TEMP_DIR}/http-proxy.conf
 
@@ -52,6 +54,7 @@ function config_proxy()
     echo "Environment=\"FTP_PROXY=http://child-prc.intel.com:913/\"" >> ${TEMP_DIR}/ftp-proxy.conf
 }
 
-pre_config ${TEMP_DIR}
+
+# entrance.
 config_proxy
 update_proxy_config
