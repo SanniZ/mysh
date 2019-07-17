@@ -90,7 +90,7 @@ function config_docker()
 # list images of docker.
 function list_image()
 {
-    echo $(docker image list)
+    echo "$(docker image list)"
 }
 
 #remove image of docker
