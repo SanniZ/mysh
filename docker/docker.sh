@@ -4,7 +4,7 @@
 # Copyright: Byng.Zeng
 #
 
-VERSION=1.0.0
+VERSION=1.0.1
 
 
 #############################################
@@ -37,10 +37,53 @@ function uninstall_docker()
     fi
 }
 
-# config proxy for docker.
-function config_proxy()
+SYSTEMD_DOCKER_PROXY_DIR=/etc/systemd/system/docker.service.d
+TEMP_DOCKER_PROXY_DIR=~/.docker.service.d.tmp #
+
+function update_docker_proxy()
 {
-    source dockerproxy.sh $@
+    sudo systemctl daemon-reload
+    sudo systemctl restart docker.service
+}
+
+# remove proxy config files.
+function remove_docker_proxy()
+{
+    if [ -e ${SYSTEMD_DOCKER_PROXY_DIR} ]; then
+        sudo rm -rf ${SYSTEMD_DOCKER_PROXY_DIR}
+    fi
+}
+
+# config proxy for docker.
+function config_docker_proxy()
+{
+    list=(http-proxy.conf https-proxy.conf ftp-proxy.conf)
+
+    # remove old temp files.
+    if [ ! -e ${TEMP_DOCKER_PROXY_DIR} ]; then
+        mkdir ${TEMP_DOCKER_PROXY_DIR}
+    fi
+    for f in ${list[@]}
+    do
+        if [ -e ${TEMP_DOCKER_PROXY_DIR}/$f ]; then
+            rm -rf ${TEMP_DOCKER_PROXY_DIR}/$f
+        fi
+    done
+
+    # create temp config files.
+    echo "[Service]" >> ${TEMP_DOCKER_PROXY_DIR}/http-proxy.conf
+    echo "Environment=\"HTTP_PROXY=http://child-prc.intel.com:913/\"" >> ${TEMP_DOCKER_PROXY_DIR}/http-proxy.conf
+    echo "[Service]" >> ${TEMP_DOCKER_PROXY_DIR}/https-proxy.conf
+    echo "Environment=\"HTTPS_PROXY=http://child-prc.intel.com:913/\"" >> ${TEMP_DOCKER_PROXY_DIR}/https-proxy.conf
+    echo "[Service]" >> ${TEMP_DOCKER_PROXY_DIR}/ftp-proxy.conf
+    echo "Environment=\"FTP_PROXY=http://child-prc.intel.com:913/\"" >> ${TEMP_DOCKER_PROXY_DIR}/ftp-proxy.conf
+
+    # remove docker proxy config dir.
+    if [ -e ${SYSTEMD_DOCKER_PROXY_DIR} ]; then
+        sudo rm -rf ${SYSTEMD_DOCKER_PROXY_DIR}
+    fi
+    # create new proxy config dir and files.
+    sudo mv ${TEMP_DOCKER_PROXY_DIR} ${SYSTEMD_DOCKER_PROXY_DIR}
 }
 
 # config docker
@@ -50,9 +93,9 @@ function config_docker()
 
 	  usage: docker -c options
 
-	  options:
-	  -p | --proxy | proxy  config:  config proxy of docker
-	                        remove:  remove proxy of docker
+	Options:
+	  -p | --proxy | proxy  install:  install proxy of docker
+	                        remove :  remove  proxy of docker
 	EOF
     )
 
@@ -65,13 +108,15 @@ function config_docker()
             case $1 in
             -p | --proxy | proxy)
                 shift
-                if [[ $1 == 'config' ]]; then
+                if [[ $1 == 'install' ]]; then
                     shift
-                    config_proxy -c -u
-                    echo 'Configurated proxy of docker'
+                    config_docker_proxy
+                    update_docker_proxy
+                    echo 'Installed proxy of docker'
                 elif [[ $1 == 'remove' ]]; then
                     shift
-                    config_proxy -r -u
+                    remove_docker_proxy
+                    update_docker_proxy
                     echo 'Removed proxy of docker'
                 else
                     echo "${USAGE}"
@@ -105,14 +150,14 @@ function remove_image()
 
     USAGE=$(cat <<- EOF
 
-	usage: docker -r options
+	usage: docker -r [Options]
 
 	Options:
-	  -a:
+	  -a | --all | all
 	    remove all of images.
-	  -n xxx:
+	  -n | --name | name   xxx:
 	    remove xxx name of image.
-	  -d xxx:
+	  -d | --id | id       xxx:
 	    remove xxx Image ID of image.
 	EOF
     )
@@ -124,7 +169,7 @@ function remove_image()
         while [ $# -gt 0 ]
         do
             case $1 in
-            -n)  # search by name of Repository
+            -n | --name | name)  # search by name of Repository
                 shift
                 if [ $# -lt 1 ]; then  # no args.
                     echo "${USAGE}"
@@ -135,7 +180,7 @@ function remove_image()
                     shift
                 fi
                 ;;
-            -d)  # search by id of image
+            -d | --id | id)  # search by id of image
                 shift
                 if [ $# -lt 1 ]; then  # no args.
                     echo "${USAGE}"
@@ -146,7 +191,7 @@ function remove_image()
                     shift
                 fi
                 ;;
-           -a)  # search all of images.
+           -a | --all | all)  # search all of images.
                 shift
                 rc=1
                 ;;
