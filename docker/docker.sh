@@ -14,14 +14,40 @@ VERSION=1.0.1
 # install docker to ubuntu host.
 function install_docker()
 {
-    DOCKER='docker docker-compose docker.io docker-registry'
+    USAGE=$(cat <<- EOF
 
-    read -p "Confirm to install docker [Y/n]:" opt
-    opt=$(echo ${opt} | tr '[a-z]' '[A-Z]')
-    if [[ ${opt} == 'Y' ]]; then
-        sudo apt-get install $DOCKER -y
-        echo "Installed docker to host."
+	    usage: docker install [options]
+
+	    Options:
+	      -a | --apt | apt:
+	        run 'sudo apt-get install docker'
+	EOF
+    )
+
+    if [ $# -gt 0 ]; then
+        while [ $# -gt 0 ];
+        do
+            case $1 in
+            -a | --apt | apt)
+                shift
+                DOCKER='docker docker-compose docker.io docker-registry'
+
+                read -p "Confirm to install docker [Y/n]:" opt
+                opt=$(echo ${opt} | tr '[a-z]' '[A-Z]')
+                if [[ ${opt} == 'Y' ]]; then
+                    sudo apt-get install $DOCKER -y
+                fi
+                ;;
+            *)
+                echo ${USAGE}
+                exit -1
+            esac
+        done
+    else
+        wget -qO- https://get.docker.com/ | sh
     fi
+
+    echo "Installed docker to host."
 }
 
 # remove docker from ubuntu host
@@ -35,6 +61,25 @@ function uninstall_docker()
         sudo apt-get autoremove $DOCKER -y
         echo "Removed docker from host."
     fi
+}
+
+
+function config_docker_daemon()
+{
+    daemon_dns="{\"dns\":[\"10.248.2.5\",\"10.239.27.236\",\"172.17.6.9\"]}"
+    daemon_tmp=.daemon.json.tmp
+    daemon_json=/etc/docker/daemon.json
+
+    if [ -e $daemon_tmp ]; then
+        rm -rf $daemon_tmp
+    fi
+    echo ${daemon_dns} >> ${daemon_tmp}
+
+    if [ -e ${daemon_json} ]; then
+        sudo mv ${daemon_json} ${daemon_json}.old
+    fi
+
+    sudo mv ${daemon_tmp} ${daemon_json}
 }
 
 SYSTEMD_DOCKER_PROXY_DIR=/etc/systemd/system/docker.service.d
@@ -72,11 +117,11 @@ function config_docker_proxy()
 
     # create temp config files.
     echo "[Service]" >> ${TEMP_DOCKER_PROXY_DIR}/http-proxy.conf
-    echo "Environment=\"HTTP_PROXY=http://child-prc.intel.com:913/\"" >> ${TEMP_DOCKER_PROXY_DIR}/http-proxy.conf
+    echo "Environment=\"HTTP_PROXY=http://child-prc.intel.com:913\" \"NO_PROXY=localhost,127.0.0.1,localaddress,.localdomain.com,10.*,192.168.*,*.intel.com\"" >> ${TEMP_DOCKER_PROXY_DIR}/http-proxy.conf
     echo "[Service]" >> ${TEMP_DOCKER_PROXY_DIR}/https-proxy.conf
-    echo "Environment=\"HTTPS_PROXY=http://child-prc.intel.com:913/\"" >> ${TEMP_DOCKER_PROXY_DIR}/https-proxy.conf
+    echo "Environment=\"HTTPS_PROXY=http://child-prc.intel.com:913\" \"NO_PROXY=localhost,127.0.0.1,localaddress,.localdomain.com,10.*,192.168.*,*.intel.com\"" >> ${TEMP_DOCKER_PROXY_DIR}/https-proxy.conf
     echo "[Service]" >> ${TEMP_DOCKER_PROXY_DIR}/ftp-proxy.conf
-    echo "Environment=\"FTP_PROXY=http://child-prc.intel.com:913/\"" >> ${TEMP_DOCKER_PROXY_DIR}/ftp-proxy.conf
+    echo "Environment=\"FTP_PROXY=http://child-prc.intel.com:913\" \"NO_PROXY=localhost,127.0.0.1,localaddress,.localdomain.com,10.*,192.168.*,*.intel.com\"" >> ${TEMP_DOCKER_PROXY_DIR}/ftp-proxy.conf
 
     # remove docker proxy config dir.
     if [ -e ${SYSTEMD_DOCKER_PROXY_DIR} ]; then
@@ -87,15 +132,16 @@ function config_docker_proxy()
 }
 
 # config docker
-function config_docker()
+function docker_proxy()
 {
     USAGE=$(cat <<- EOF
 
 	  usage: docker -c options
 
 	Options:
-	  -p | --proxy | proxy  install:  install proxy of docker
-	                        remove :  remove  proxy of docker
+	  -c | --config | config :  install proxy of docker.
+	  -r | --remove | remove :  remove  proxy of docker.
+	  -u | --update | update :  update  proxy of docker.
 	EOF
     )
 
@@ -106,22 +152,18 @@ function config_docker()
         while [ $# -gt 0 ]
         do
             case $1 in
-            -p | --proxy | proxy)
+            -c | --config | config)
                 shift
-                if [[ $1 == 'install' ]]; then
-                    shift
-                    config_docker_proxy
-                    update_docker_proxy
-                    echo 'Installed proxy of docker'
-                elif [[ $1 == 'remove' ]]; then
-                    shift
-                    remove_docker_proxy
-                    update_docker_proxy
-                    echo 'Removed proxy of docker'
-                else
-                    echo "${USAGE}"
-                    exit -1
-                fi
+                config_docker_proxy
+                echo 'Installed proxy of docker'
+                ;;
+            -r | --remove | remove)
+                shift
+                remove_docker_proxy
+                echo 'Removed proxy of docker'
+                ;;
+           -u | --update | update)
+                update_docker_proxy
                 ;;
             *)
                 echo "${USAGE}"
@@ -244,8 +286,8 @@ function usage_help()
 	    install docker at host.
 	  -u | --uninstall | uninstall:
 	    uninstall docker at host.
-	  -c | --config | config:
-	    config docker.
+	  -p | --proxy | proxy:
+	    config docker proxy.
 	  -r | --rmi | rmi:
 	    remove image of docker.
 	  -l | --list | list:
@@ -268,15 +310,15 @@ else
         case $1 in
         -i | --install | install)
             shift
-            install_docker
+            install_docker $@
             ;;
         -u | --uninstall | uninstall)
             shift
-            uninstall_docker
+            uninstall_docker $@
             ;;
-        -c | --config | config)
+        -p | --proxy | proxy)
             shift
-            config_docker $@
+            docker_proxy $@
             shift
             ;;
         -r | --rmi | rmi)
@@ -285,11 +327,15 @@ else
             for index in $(seq $?)
             do
                 shift
-                done
+            done
             ;;
         -l | --list | list)
             shift
             list_image
+            ;;
+        -d | --daemon | daemon)
+            shift
+            config_docker_daemon $@
             ;;
         *)
             usage_help
