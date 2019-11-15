@@ -18,6 +18,8 @@ function usage_help()
 	    run push origin master.
 	  -m | modified :
 	    check modified files.
+	  -u | unchecked :
+	    check modified files.
 	EOF
     )
     echo "$USAGE"
@@ -25,14 +27,14 @@ function usage_help()
 
 function push_origin_master()
 {
-    for d in $(ls $GIT)
+    for d in $(ls $1)
     do
-        dr=$GIT/$d
+        dr=$1/$d
         res=$(find $dr -name .git | grep '.git')
         if [[ -z $res ]]; then
             continue
         fi
-        echo "---$dr---"
+        echo "-----$dr-----"
         cd $dr
         res=$(git status | grep "modified:")
         if [[ ! -z $res ]]; then
@@ -48,9 +50,9 @@ function push_origin_master()
 
 function check_modified_files()
 {
-    for d in $(ls $GIT)
+    for d in $(ls $1)
     do
-        dr=$GIT/$d
+        dr=$1/$d
         res=$(find $dr -name .git | grep '.git')
         if [[ -z $res ]]; then
             continue
@@ -58,8 +60,28 @@ function check_modified_files()
         cd $dr
         res=$(git status | grep "modified:")
         if [[ ! -z $res ]]; then
-            echo "---$dr---"
+            echo "-----$dr-----"
             echo "found modified files!!!"
+        fi
+    done
+    # go back origin path.
+    cd $CURDIR
+}
+
+function check_untracked_files()
+{
+    for d in $(ls $1)
+    do
+        dr=$1/$d
+        res=$(find $dr -name .git | grep '.git')
+        if [[ -z $res ]]; then
+            continue
+        fi
+        cd $dr
+        res=$(git status | grep "Untracked files:")
+        if [[ ! -z $res ]]; then
+            echo "-----$dr-----"
+            echo "found untracked files!!!"
         fi
     done
     # go back origin path.
@@ -75,11 +97,15 @@ else
         case $1 in
 	    -p | push)
 	        shift
-	        push_origin_master
+	        push_origin_master $GIT
 	        ;;
 	    -m | modified)
 	        shift
-	        check_modified_files
+	        check_modified_files $GIT
+	        ;;
+	    -u | unchecked)
+	        shift
+	        check_untracked_files $GIT
 	        ;;
 	    *)
 	        echo "Error, found unknown command $1"
