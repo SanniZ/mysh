@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION='1.0.1'
+VERSION='1.0.2'
 
 
 if [ $# == 0 ]; then
@@ -13,19 +13,23 @@ else
         case $1 in
 	    -p)
 	        shift
-	        bash ${git_dir}/git.sh -p $GIT
+	        res=$(bash ${git_dir}/git.sh -p $GIT)
+            echo -e "$res"
 	        ;;
 	    -m)
 	        shift
-	        bash ${git_dir}/git.sh -m $GIT "pyc|__pycache__"
+	        res=$(bash ${git_dir}/git.sh -m $GIT "pyc|__pycache__")
+            echo -e "$res"
 	        ;;
 	    -n)
 	        shift
-	        bash ${git_dir}/git.sh -n $GIT "pyc|__pycache__"
+	        res=$(bash ${git_dir}/git.sh -n $GIT "pyc|__pycache__")
+            echo -e "$res"
 	        ;;
 	    *)
             shift
-	        bash ${git_dir}/git.sh -h 'mygit'
+	        res=$(bash ${git_dir}/git.sh -h)
+            echo -e "$res" | sed 's/git/mygit/'
 	        exit
 	    esac
     done

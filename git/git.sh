@@ -1,34 +1,24 @@
 #!/bin/bash
 
-VERSION='1.0.0'
+VERSION='1.0.1'
 
 CURDIR=$(pwd)
 
 
 function git_help()
 {
-    if [ $# -gt 0 ]; then
-        echo "---------------------------------------"
-        echo "    $1 - $VERSION"
-        echo "---------------------------------------"
-    else
-        echo "----------------------------------------"
-        echo "git - $VERSION"
-        echo "----------------------------------------"
-
-    fi
-
-    USAGE=$(cat <<- EOF
+    HELPS=$(cat <<- EOF
+	"----------------------------------------"
+	"    git - $VERSION"
+	"----------------------------------------"
 	usage:  git options  
-
 	options:
 	  -p path : push to master of path.
 	  -m path ex_file: get modified files of path.
 	  -n path ex_file: get new files of path.
 	EOF
     )
-    echo "$USAGE"
-    exit
+    echo -e "$HELPS"
 }
 
 
@@ -129,7 +119,8 @@ else
 	        ;;
 	    *)
             shift
-	        git_help $1
+            git_help $@
+            exit
 	    esac
     done
 fi
