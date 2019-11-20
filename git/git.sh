@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION='1.0.1'
+VERSION='1.0.2'
 
 CURDIR=$(pwd)
 
@@ -31,9 +31,9 @@ function git_push_origin_master()
     fi
 
     gits=$(find $1 -type d -name .git | sed 's/\/.git//')
-    for git in $gits
+    for git in ${gits[@]}
     do
-        echo "-----$git-----"
+        echo "-----${git:${#GIT}+1:${#git}}-----"
         cd $git
         git push origin master # push to github.
     done
