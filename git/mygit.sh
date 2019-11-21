@@ -1,7 +1,6 @@
 #!/bin/bash
 
-VERSION='1.0.2'
-
+VERSION='1.0.3'
 
 if [ $# == 0 ]; then
     mygit_help
@@ -13,23 +12,20 @@ else
         case $1 in
 	    -p)
 	        shift
-	        res=$(bash ${git_dir}/git.sh -p $GIT)
-            echo -e "$res"
+	        bash ${git_dir}/git.sh -p $GIT
 	        ;;
 	    -m)
 	        shift
-	        res=$(bash ${git_dir}/git.sh -m $GIT "pyc|__pycache__")
-            echo -e "$res"
+	        bash ${git_dir}/git.sh -m $GIT "pyc|__pycache__"
 	        ;;
 	    -n)
 	        shift
-	        res=$(bash ${git_dir}/git.sh -n $GIT "pyc|__pycache__")
-            echo -e "$res"
+	        bash ${git_dir}/git.sh -n $GIT "pyc|__pycache__"
 	        ;;
 	    *)
             shift
-	        res=$(bash ${git_dir}/git.sh -h)
-            echo -e "$res" | sed 's/git/mygit/'
+            res=$(bash ${git_dir}/git.sh -h)
+            echo -e "$res[@]" | sed 's/git/mygit/g'
 	        exit
 	    esac
     done

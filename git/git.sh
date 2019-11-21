@@ -1,8 +1,6 @@
 #!/bin/bash
 
-VERSION='1.0.2'
-
-CURDIR=$(pwd)
+VERSION='1.0.3'
 
 
 function git_help()
@@ -25,25 +23,28 @@ function git_help()
 
 function git_push_origin_master()
 {
+    exepath=$(pwd)
+    path=$1
     if [ $# -lt 1 ]; then
         echo 'error, pls input path!!!'
         return
     fi
 
-    gits=$(find $1 -type d -name .git | sed 's/\/.git//')
+    gits=$(find ${path} -type d -name .git | sed 's/\/.git//')
     for git in ${gits[@]}
     do
-        echo "-----${git:${#GIT}+1:${#git}}-----"
         cd $git
-        git push origin master # push to github.
+        echo "-----${git:${#path}+1:${#git}}-----"
+        echo $(git push origin master) # push to github.
     done
-    # go back origin path.
-    cd $CURDIR
+    # go back
+    cd $exepath
 }
 
 
 function git_status_files()
 {
+    exepath=$(pwd)
     path=$1
     if [ $# -gt 2 ]; then
         ex=$2
@@ -78,7 +79,7 @@ function git_status_files()
                     fi
                     # print path.
                     if [ ${pr_path} == 1 ]; then
-                        echo "-----${git:${#GIT}+1:${#git}}-----"
+                        echo "-----${git:${#path}+1:${#git}}-----"
                         pr_path=0
                     fi
                     # print result file.
@@ -88,7 +89,7 @@ function git_status_files()
         fi
     done
     # go back origin path.
-    cd $CURDIR
+    cd $exepath
 }
 
 
