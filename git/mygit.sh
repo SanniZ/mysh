@@ -2,11 +2,13 @@
 
 VERSION='1.0.3'
 
+git_dir=$(cd `dirname $0`; pwd)
+
 if [ $# == 0 ]; then
-    mygit_help
+    res=$(bash ${git_dir}/git.sh -h)
+    echo -e "$res[@]" | sed 's/git/mygit/g'
     exit -1
 else
-    git_dir=$(cd `dirname $0`; pwd)
     while [ $# -gt 0 ]
     do
         case $1 in
