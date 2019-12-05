@@ -14,6 +14,7 @@ function git_help()
 	  -p path : push to master of path.
 	  -m path ex_file: get modified files of path.
 	  -n path ex_file: get new files of path.
+	  -s path : sync files.
 	EOF
     )
     echo -e "$HELPS"
@@ -93,6 +94,28 @@ function git_status_files()
 }
 
 
+function git_pull_files()
+{
+    exepath=$(pwd)
+    path=$1
+    if [ $# -lt 1 ]; then
+        echo 'error, pls input path!!!'
+        return
+    fi
+
+    gits=$(find ${path} -type d -name .git | sed 's/\/.git//')
+    for git in ${gits[@]}
+    do
+        cd $git
+        echo "-----${git:${#path}+1:${#git}}-----"
+        echo $(git pull) # push to github.
+    done
+    # go back
+    cd $exepath    
+}
+
+
+# entance.:
 if [ $# == 0 ]; then
     git_help
 else
@@ -105,19 +128,24 @@ else
 	            git_push_origin_master $1
                 shift
             fi
-	        ;;
+	    ;;
 	    -m)
 	        shift
 	        git_status_files $1 $2 "M"
             shift
             shift
-	        ;;
+	    ;;
 	    -n)
 	        shift
 	        git_status_files $1 $2 "??"
             shift
             shift
-	        ;;
+	    ;;
+        -s)
+            shift
+            git_pull_files $1
+            shift
+        ;;
 	    *)
             shift
             git_help $@
